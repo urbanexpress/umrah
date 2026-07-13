@@ -11,495 +11,659 @@
   :root{
     --emerald:#0b4d3f;--emerald-deep:#083a30;--gold:#b6862c;--gold-soft:#c9a94a;
     --paper:#f5f2ea;--paper-2:#efe9dc;--ink:#1c2420;--ink-soft:#5a655d;
-    --line:#dfd8c8;--white:#fff;--danger:#a23b2d;--ok:#0b7a5a;
+    --line:#dfd8c8;--white:#fff;--danger:#a23b2d;--ok:#0b7a5a;--blue:#2b5d8a;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--paper);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
 
-  /* ---- shell ---- */
   .topbar{background:var(--emerald);color:#f3ecd8;padding:12px 22px;display:flex;align-items:center;gap:14px;border-bottom:3px solid var(--gold);position:sticky;top:0;z-index:20}
   .topbar .kaaba{width:34px;height:34px;flex:none;display:grid;place-items:center;background:var(--emerald-deep);border:1px solid var(--gold);border-radius:6px;font-family:'Amiri',serif;color:var(--gold-soft);font-size:18px}
   .topbar h1{font-size:15px;font-weight:700}
-  .topbar .sub{font-size:11px;color:#bcd3c9;font-weight:500}
+  .topbar .sub{font-size:11px;color:#bcd3c9}
   .topbar .spacer{flex:1}
-  .btn{font-family:inherit;font-weight:700;cursor:pointer;border-radius:9px;border:none;letter-spacing:.3px;font-size:13px;padding:9px 15px;transition:background .15s,border-color .15s,color .15s}
-  .btn-gold{background:var(--gold);color:#3a2a08}
-  .btn-gold:hover{background:var(--gold-soft)}
-  .btn-emerald{background:var(--emerald);color:#f3ecd8}
-  .btn-emerald:hover{background:var(--emerald-deep)}
-  .btn-ghost{background:transparent;color:var(--ink-soft);border:1px solid var(--line)}
-  .btn-ghost:hover{border-color:var(--gold);color:var(--emerald)}
-  .btn-sm{font-size:12px;padding:6px 11px}
-  .btn-danger-ghost{background:transparent;color:var(--danger);border:1px solid #e8d5cf}
-  .btn-danger-ghost:hover{background:#f7ede9}
 
-  .tabs{display:flex;gap:2px;background:var(--paper-2);padding:0 22px;border-bottom:1px solid var(--line);position:sticky;top:59px;z-index:15}
-  .tab{font-family:inherit;font-size:13px;font-weight:700;color:var(--ink-soft);background:transparent;border:none;padding:13px 18px;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-1px}
+  .btn{font-family:inherit;font-weight:700;cursor:pointer;border-radius:9px;border:none;letter-spacing:.2px;font-size:13px;padding:9px 15px;transition:.15s}
+  .btn-gold{background:var(--gold);color:#3a2a08}.btn-gold:hover{background:var(--gold-soft)}
+  .btn-emerald{background:var(--emerald);color:#f3ecd8}.btn-emerald:hover{background:var(--emerald-deep)}
+  .btn-ghost{background:transparent;color:var(--ink-soft);border:1px solid var(--line)}.btn-ghost:hover{border-color:var(--gold);color:var(--emerald)}
+  .btn-blue{background:var(--blue);color:#eaf1f8}.btn-blue:hover{filter:brightness(1.1)}
+  .btn-sm{font-size:12px;padding:6px 11px}
+  .btn-danger-ghost{background:transparent;color:var(--danger);border:1px solid #e8d5cf}.btn-danger-ghost:hover{background:#f7ede9}
+
+  .tabs{display:flex;gap:2px;background:var(--paper-2);padding:0 22px;border-bottom:1px solid var(--line);position:sticky;top:59px;z-index:15;overflow-x:auto}
+  .tab{font-family:inherit;font-size:13px;font-weight:700;color:var(--ink-soft);background:transparent;border:none;padding:13px 16px;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-1px;white-space:nowrap}
   .tab.active{color:var(--emerald);border-bottom-color:var(--gold)}
   .tab:hover:not(.active){color:var(--ink)}
 
-  .wrap{max-width:1080px;margin:0 auto;padding:24px 22px 60px}
+  .wrap{max-width:1120px;margin:0 auto;padding:22px 20px 70px}
   .view{display:none}.view.active{display:block}
 
-  /* ---- stat cards ---- */
-  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
-  .stat{background:var(--white);border:1px solid var(--line);border-radius:12px;padding:16px 18px;position:relative;overflow:hidden}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+  .stat{background:var(--white);border:1px solid var(--line);border-radius:12px;padding:14px 16px;position:relative;overflow:hidden}
   .stat::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--gold)}
-  .stat .lbl{font-size:11px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:var(--ink-soft)}
-  .stat .val{font-size:23px;font-weight:800;color:var(--emerald);margin-top:4px}
-  .stat .val small{font-size:13px;font-weight:600;color:var(--ink-soft)}
+  .stat .lbl{font-size:10.5px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--ink-soft)}
+  .stat .val{font-size:20px;font-weight:800;color:var(--emerald);margin-top:3px}
 
-  /* ---- toolbar ---- */
   .toolbar{display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
   .search{flex:1;min-width:180px;position:relative}
   .search input{width:100%;font-family:inherit;font-size:13.5px;padding:9px 11px 9px 34px;border:1px solid var(--line);border-radius:9px;background:var(--white)}
   .search::before{content:"⌕";position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--ink-soft);font-size:16px}
-  .search input:focus,.card input:focus,.card select:focus,.card textarea:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(182,134,44,.15)}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(182,134,44,.15)}
 
-  /* ---- table ---- */
-  .tbl-card{background:var(--white);border:1px solid var(--line);border-radius:12px;overflow:hidden}
-  table{width:100%;border-collapse:collapse;font-size:13px}
-  thead th{background:var(--emerald);color:#e8f0ec;text-align:left;padding:11px 14px;font-size:11px;letter-spacing:.6px;text-transform:uppercase;font-weight:700}
-  tbody td{padding:11px 14px;border-top:1px solid var(--line);vertical-align:middle}
+  .tbl-card{background:var(--white);border:1px solid var(--line);border-radius:12px;overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:13px;min-width:640px}
+  thead th{background:var(--emerald);color:#e8f0ec;text-align:left;padding:10px 13px;font-size:10.5px;letter-spacing:.5px;text-transform:uppercase;font-weight:700}
+  tbody td{padding:10px 13px;border-top:1px solid var(--line);vertical-align:middle}
   tbody tr:hover{background:#faf7f0}
   td.nama{font-weight:700;color:var(--emerald)}
   td.harga{font-weight:700;white-space:nowrap}
   td.act{white-space:nowrap;text-align:right}
-  td.act button{margin-left:5px}
-  .empty-state{padding:46px 20px;text-align:center;color:var(--ink-soft)}
+  td.act button{margin-left:4px}
+  .badge{display:inline-block;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px}
+  .badge.lunas{background:#dcefe6;color:var(--ok)}
+  .badge.dp{background:#fdf1d8;color:#8a6516}
+  .badge.belum{background:#f6e7e3;color:var(--danger)}
+  .empty-state{padding:44px 20px;text-align:center;color:var(--ink-soft)}
   .empty-state .big{font-family:'Amiri',serif;font-size:34px;color:var(--line);margin-bottom:8px}
 
-  /* ---- settings ---- */
-  .card{background:var(--white);border:1px solid var(--line);border-radius:12px;padding:20px 22px;margin-bottom:18px}
-  .card > h2{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--emerald);margin-bottom:14px;display:flex;align-items:center;gap:9px}
+  .card{background:var(--white);border:1px solid var(--line);border-radius:12px;padding:20px 22px;margin-bottom:16px}
+  .card > h2{font-size:12.5px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--emerald);margin-bottom:14px;display:flex;align-items:center;gap:9px}
   .card > h2 .no{font-family:'Amiri',serif;font-size:13px;width:24px;height:24px;border-radius:50%;background:var(--emerald);color:var(--gold-soft);display:grid;place-items:center;flex:none}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px 14px}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px 14px}
   .field{display:flex;flex-direction:column;gap:5px}
   .field.full{grid-column:1/-1}
-  label{font-size:11.5px;font-weight:600;color:var(--ink-soft);letter-spacing:.3px}
+  label{font-size:11.5px;font-weight:600;color:var(--ink-soft);letter-spacing:.2px}
   input[type=text],input[type=tel],input[type=date],input[type=number],select,textarea{font-family:inherit;font-size:14px;color:var(--ink);background:var(--white);border:1px solid var(--line);border-radius:8px;padding:9px 11px;width:100%}
-  textarea{resize:vertical;min-height:48px}
+  textarea{resize:vertical;min-height:44px}
+  .price-wrap{position:relative}.price-wrap .rp{position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:13px;font-weight:600;color:var(--ink-soft);pointer-events:none}
+  .price-wrap input{padding-left:33px;font-weight:700}
 
-  /* priced checklist rows */
-  .rows{display:flex;flex-direction:column;gap:7px}
-  .prow{display:grid;grid-template-columns:20px 1fr 150px 34px;gap:9px;align-items:center;background:var(--paper);border:1px solid var(--line);border-radius:9px;padding:7px 9px}
-  .prow.off{opacity:.5;border-style:dashed;background:transparent}
-  .prow input[type=checkbox]{width:17px;height:17px;accent-color:var(--emerald);cursor:pointer;margin:0}
-  .prow .name{border:1px solid transparent;background:transparent;font-size:13.5px;font-weight:600}
-  .prow .name:focus{background:var(--white);border-color:var(--gold)}
-  .prow .price-cell{position:relative}
-  .prow .price-cell .rp{position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--ink-soft);font-weight:600;pointer-events:none}
-  .prow .price-cell input{padding-left:28px;font-size:13px;font-weight:600;text-align:right;background:var(--white)}
-  .prow .del{border:none;background:transparent;color:#c3b9a3;cursor:pointer;font-size:17px;line-height:1;border-radius:5px;padding:2px}
-  .prow .del:hover{color:var(--danger);background:#f7ede9}
-  .rows-head{display:grid;grid-template-columns:20px 1fr 150px 34px;gap:9px;padding:0 9px 4px;font-size:10.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--ink-soft)}
-  .rows-head span:nth-child(3){text-align:right}
-  .add-btn{align-self:flex-start;margin-top:8px;font-family:inherit;font-size:12.5px;font-weight:600;color:var(--emerald);background:transparent;border:1px dashed var(--gold);border-radius:7px;padding:7px 13px;cursor:pointer}
+  .comp{width:100%;border-collapse:collapse;font-size:13px}
+  .comp th{text-align:left;font-size:10px;letter-spacing:.4px;text-transform:uppercase;color:var(--ink-soft);font-weight:700;padding:0 6px 6px}
+  .comp th.r,.comp td.r{text-align:right}
+  .comp td{padding:4px 6px;border-top:1px solid var(--line)}
+  .comp tr.off{opacity:.45}
+  .comp input,.comp select{font-size:13px;padding:6px 8px;border:1px solid var(--line);border-radius:7px;background:var(--white);width:100%}
+  .comp input[type=checkbox]{width:16px;height:16px;accent-color:var(--emerald);padding:0}
+  .comp .cur{width:74px}
+  .comp .num{text-align:right}
+  .comp .total{font-weight:700;white-space:nowrap;color:var(--emerald)}
+  .comp .del{border:none;background:transparent;color:#c3b9a3;cursor:pointer;font-size:16px;padding:2px 5px;border-radius:5px}
+  .comp .del:hover{color:var(--danger);background:#f7ede9}
+  .add-btn{margin-top:10px;font-family:inherit;font-size:12.5px;font-weight:600;color:var(--emerald);background:transparent;border:1px dashed var(--gold);border-radius:7px;padding:7px 13px;cursor:pointer}
   .add-btn:hover{background:rgba(182,134,44,.1)}
 
-  .totals{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:6px}
-  .tbox{border:1px solid var(--line);border-radius:9px;padding:11px 14px;background:var(--paper)}
-  .tbox.main{background:linear-gradient(135deg,var(--emerald),var(--emerald-deep));border-color:var(--gold)}
-  .tbox .k{font-size:10.5px;letter-spacing:.5px;text-transform:uppercase;color:var(--ink-soft);font-weight:600}
-  .tbox.main .k{color:var(--gold-soft)}
-  .tbox .n{font-size:17px;font-weight:800;color:var(--emerald);margin-top:2px}
-  .tbox.main .n{color:#fff}
+  .result{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:8px}
+  .rbox{border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--paper)}
+  .rbox .k{font-size:10px;letter-spacing:.4px;text-transform:uppercase;color:var(--ink-soft);font-weight:600}
+  .rbox .v{font-size:17px;font-weight:800;color:var(--emerald);margin-top:2px}
+  .roomprices{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
+  .rp-box{border-radius:10px;padding:14px;text-align:center;border:1px solid var(--gold);background:linear-gradient(135deg,var(--emerald),var(--emerald-deep));color:#fff}
+  .rp-box .t{font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--gold-soft);font-weight:700}
+  .rp-box .p{font-size:19px;font-weight:800;margin-top:3px}
+  .rp-box .s{font-size:10.5px;color:#bcd3c9;margin-top:2px}
+
+  .rows{display:flex;flex-direction:column;gap:6px}
+  .lrow{display:flex;align-items:center;gap:8px;background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:5px 8px}
+  .lrow.off{opacity:.5;border-style:dashed;background:transparent}
+  .lrow input[type=checkbox]{width:16px;height:16px;accent-color:var(--emerald);flex:none}
+  .lrow .t{flex:1;border:none;background:transparent;font-size:13px;padding:3px 2px}
+  .lrow .t:focus{outline:none;border-bottom:1px solid var(--gold)}
+  .lrow .del{border:none;background:transparent;color:#c3b9a3;cursor:pointer;font-size:16px;padding:2px}
+  .lrow .del:hover{color:var(--danger)}
+
+  .save-bar{display:flex;gap:10px;align-items:center;justify-content:flex-end;margin-top:6px}
+  .flash{color:var(--ok);font-size:12.5px;font-weight:600;opacity:0;transition:.3s}.flash.show{opacity:1}
   .hint{font-size:11.5px;color:var(--ink-soft);margin-top:8px;font-style:italic}
 
-  .save-bar{display:flex;gap:10px;align-items:center;justify-content:flex-end;margin-top:4px}
-  .saved-flash{color:var(--ok);font-size:12.5px;font-weight:600;opacity:0;transition:opacity .3s}
-  .saved-flash.show{opacity:1}
-
-  /* ---- modal ---- */
-  .overlay{position:fixed;inset:0;background:rgba(8,32,26,.55);display:none;align-items:flex-start;justify-content:center;padding:26px 16px;overflow:auto;z-index:50}
+  .overlay{position:fixed;inset:0;background:rgba(8,32,26,.55);display:none;align-items:flex-start;justify-content:center;padding:24px 14px;overflow:auto;z-index:50}
   .overlay.open{display:flex}
-  .modal{background:var(--paper);border-radius:14px;width:100%;max-width:620px;box-shadow:0 25px 60px -20px rgba(0,0,0,.5);overflow:hidden}
-  .modal-head{background:var(--emerald);color:#f3ecd8;padding:15px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid var(--gold)}
+  .modal{background:var(--paper);border-radius:14px;width:100%;max-width:560px;box-shadow:0 25px 60px -20px rgba(0,0,0,.5);overflow:hidden}
+  .modal-head{background:var(--emerald);color:#f3ecd8;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid var(--gold)}
   .modal-head h3{font-size:15px;font-weight:700}
-  .modal-head .x{background:transparent;border:none;color:#bcd3c9;font-size:22px;cursor:pointer;line-height:1}
-  .modal-head .x:hover{color:#fff}
-  .modal-body{padding:20px;max-height:70vh;overflow:auto}
-  .modal-body .card{margin-bottom:14px;padding:15px 16px}
-  .mchecks{display:flex;flex-direction:column;gap:5px}
-  .mcheck{display:flex;align-items:center;gap:8px;font-size:13px;padding:4px 2px}
-  .mcheck input{width:16px;height:16px;accent-color:var(--emerald);margin:0}
-  .mcheck .p{margin-left:auto;font-size:12px;color:var(--ink-soft);font-weight:600}
-  .modal-foot{padding:14px 20px;background:var(--white);border-top:1px solid var(--line);display:flex;gap:10px;justify-content:flex-end}
-  .price-wrap{position:relative}
-  .price-wrap .rp{position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:14px;font-weight:600;color:var(--ink-soft);pointer-events:none}
-  .price-wrap input{padding-left:34px;font-weight:700}
+  .modal-head .x{background:transparent;border:none;color:#bcd3c9;font-size:22px;cursor:pointer}
+  .modal-body{padding:18px}
+  .modal-foot{padding:13px 18px;background:var(--white);border-top:1px solid var(--line);display:flex;gap:10px;justify-content:flex-end}
+  .pay-list{margin-top:10px;font-size:13px}
+  .pay-list .prow2{display:flex;justify-content:space-between;padding:6px 0;border-top:1px dashed var(--line)}
+  .pay-list .prow2 .del{border:none;background:transparent;color:var(--danger);cursor:pointer;font-size:13px}
 
   .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--emerald-deep);color:#f3ecd8;padding:11px 20px;border-radius:10px;font-size:13px;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,.3);opacity:0;pointer-events:none;transition:.25s;z-index:80;border:1px solid var(--gold)}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-  @media (max-width:760px){
-    .stats,.totals{grid-template-columns:1fr}
+  .nota-view{position:fixed;inset:0;background:rgba(8,32,26,.65);display:none;z-index:60;overflow:auto;padding:24px 12px}
+  .nota-view.open{display:block}
+  .nota-actions{max-width:720px;margin:0 auto 12px;display:flex;gap:10px;justify-content:flex-end}
+  .nota{max-width:720px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.4)}
+  .nota-top{background:var(--emerald);color:#f3ecd8;text-align:center;padding:22px 24px;border-bottom:3px solid var(--gold)}
+  .nota-top .bism{font-family:'Amiri',serif;font-size:15px;color:var(--gold-soft);margin-bottom:5px}
+  .nota-top h3{font-size:20px;font-weight:800}
+  .nota-top .co{font-size:12px;color:#bcd3c9;margin-top:3px}
+  .nota-body{padding:22px 26px}
+  .nota-id{display:flex;flex-direction:column;gap:3px;margin-bottom:16px}
+  .nota-id .r{display:flex;font-size:13px}
+  .nota-id .r .k{width:150px;flex:none;color:var(--ink-soft);font-weight:500}
+  .nota-id .r .k::after{content:":";float:right;padding-right:10px}
+  .nota-id .r .v{font-weight:600}
+  .nota-sec-title{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--gold);border-bottom:1px solid var(--line);padding-bottom:5px;margin:16px 0 10px}
+  .nota-prices{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .np{border:1px solid var(--line);border-radius:9px;overflow:hidden;text-align:center}
+  .np .h{background:var(--emerald);color:var(--gold-soft);font-size:12px;font-weight:700;padding:6px;text-transform:uppercase;letter-spacing:.5px}
+  .np .b{padding:11px 6px;font-size:16px;font-weight:800;color:var(--emerald)}
+  .np .pp{font-size:10px;color:var(--ink-soft);font-weight:500;display:block;margin-top:2px}
+  .nota-cols{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:6px}
+  .nota-cols h4{font-size:12px;font-weight:700;color:var(--emerald);margin-bottom:7px}
+  .nota-cols ul{list-style:none;display:flex;flex-direction:column;gap:4px}
+  .nota-cols li{font-size:12.5px;display:flex;gap:7px}
+  .nota-cols .inc li::before{content:"✓";color:var(--emerald);font-weight:800}
+  .nota-cols .exc li::before{content:"✕";color:var(--danger);font-weight:700;font-size:11px}
+  .pay-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:4px}
+  .pay-table th{background:var(--emerald);color:#e8f0ec;text-align:left;padding:8px 11px;font-size:10.5px;text-transform:uppercase;letter-spacing:.4px}
+  .pay-table td{padding:8px 11px;border-top:1px solid var(--line)}
+  .pay-table td.r,.pay-table th.r{text-align:right}
+  .pay-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+  .ps{border:1px solid var(--line);border-radius:9px;padding:11px;text-align:center}
+  .ps .k{font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--ink-soft);font-weight:600}
+  .ps .v{font-size:15px;font-weight:800;margin-top:2px}
+  .ps.paid .v{color:var(--ok)}.ps.due .v{color:var(--danger)}
+  .nota-foot{background:var(--paper);border-top:1px dashed var(--line);padding:11px 26px;font-size:11px;color:var(--ink-soft);font-style:italic;text-align:center}
+
+  @media (max-width:820px){
+    .stats,.result{grid-template-columns:1fr 1fr}
+    .grid3,.roomprices,.nota-prices,.pay-summary{grid-template-columns:1fr}
     .grid2{grid-template-columns:1fr}
-    .prow,.rows-head{grid-template-columns:20px 1fr 110px 30px}
-    thead th.hide,tbody td.hide{display:none}
+    .nota-cols{grid-template-columns:1fr}
+  }
+  @media print{
+    body *{visibility:hidden}
+    .nota-view,.nota-view *{visibility:visible}
+    .nota-view{position:absolute;inset:0;background:#fff;padding:0}
+    .nota-actions{display:none}
+    .nota{box-shadow:none;max-width:100%;border-radius:0}
   }
 </style>
 </head>
 <body>
   <div class="topbar">
     <div class="kaaba">☪</div>
-    <div>
-      <h1>Panel Admin — Penawaran Umroh</h1>
-      <div class="sub">Rekap data jamaah &amp; pengaturan harga komponen</div>
-    </div>
+    <div><h1>Panel Admin — Penawaran Umroh</h1><div class="sub">Kalkulasi biaya · penawaran · pembayaran</div></div>
     <div class="spacer"></div>
-    <button class="btn btn-gold" id="btnNew">+ Buat Penawaran Baru</button>
+    <button class="btn btn-gold" id="btnNew">+ Buat Penawaran</button>
   </div>
 
   <div class="tabs">
     <button class="tab active" data-view="rekap">Rekap Data</button>
+    <button class="tab" data-view="buat">Buat / Hitung Penawaran</button>
     <button class="tab" data-view="setting">Pengaturan Harga</button>
   </div>
 
   <div class="wrap">
-    <!-- ================= REKAP ================= -->
+    <!-- ============ REKAP ============ -->
     <section class="view active" id="view-rekap">
       <div class="stats">
-        <div class="stat"><div class="lbl">Total Penawaran</div><div class="val" id="stCount">0</div></div>
-        <div class="stat"><div class="lbl">Total Nilai Penawaran</div><div class="val" id="stValue">Rp 0</div></div>
-        <div class="stat"><div class="lbl">Rata-rata Harga Paket</div><div class="val" id="stAvg">Rp 0</div></div>
+        <div class="stat"><div class="lbl">Penawaran</div><div class="val" id="stCount">0</div></div>
+        <div class="stat"><div class="lbl">Sudah Bayar (masuk)</div><div class="val" id="stPaid">Rp 0</div></div>
+        <div class="stat"><div class="lbl">Sisa Tagihan</div><div class="val" id="stDue">Rp 0</div></div>
+        <div class="stat"><div class="lbl">Jamaah Lunas</div><div class="val" id="stLunas">0</div></div>
       </div>
-
       <div class="toolbar">
-        <div class="search"><input type="text" id="q" placeholder="Cari nama, program, atau no. HP…"></div>
+        <div class="search"><input type="text" id="q" placeholder="Cari nama / program…"></div>
         <button class="btn btn-ghost btn-sm" id="btnCsv">Export CSV</button>
         <button class="btn btn-ghost btn-sm" id="btnJson">Backup JSON</button>
         <button class="btn btn-ghost btn-sm" id="btnImport">Impor JSON</button>
         <input type="file" id="fileImport" accept=".json" hidden>
       </div>
-
       <div class="tbl-card">
         <table>
-          <thead>
-            <tr>
-              <th>Nama Jamaah</th>
-              <th class="hide">Program</th>
-              <th>Kelas</th>
-              <th class="hide">No. HP</th>
-              <th class="hide">Berangkat</th>
-              <th>Harga</th>
-              <th style="text-align:right">Aksi</th>
-            </tr>
-          </thead>
+          <thead><tr>
+            <th>Nama Jamaah</th><th>Program</th><th>Pax</th><th>Berangkat</th>
+            <th>Harga (Quad)</th><th>Status</th><th style="text-align:right">Aksi</th>
+          </tr></thead>
           <tbody id="tbody"></tbody>
         </table>
         <div class="empty-state" id="emptyState">
-          <div class="big">☪</div>
-          <div>Belum ada penawaran tersimpan.</div>
+          <div class="big">☪</div><div>Belum ada penawaran.</div>
           <div style="margin-top:12px"><button class="btn btn-emerald btn-sm" onclick="document.getElementById('btnNew').click()">Buat penawaran pertama</button></div>
         </div>
       </div>
     </section>
 
-    <!-- ================= SETTING ================= -->
+    <!-- ============ BUAT / HITUNG ============ -->
+    <section class="view" id="view-buat">
+      <input type="hidden" id="bId">
+      <div class="card">
+        <h2><span class="no">١</span>Data Calon Jamaah</h2>
+        <div class="grid3">
+          <div class="field full" style="grid-column:span 2"><label>Nama Calon Jamaah</label><input type="text" id="bNama" placeholder="Abdan Muhammad"></div>
+          <div class="field"><label>Jumlah (pax)</label><input type="number" id="bJumlah" value="5" min="1"></div>
+          <div class="field"><label>Program</label><input type="text" id="bProgram" value="9 Hari"></div>
+          <div class="field"><label>Asal Bandara</label><input type="text" id="bBandara" value="Soekarno Hatta"></div>
+          <div class="field"><label>No. HP</label><input type="tel" id="bHp" placeholder="0812-xxxx-xxxx"></div>
+          <div class="field"><label>Tgl Berangkat</label><input type="date" id="bTglGo"></div>
+          <div class="field"><label>Tgl Pulang</label><input type="date" id="bTglBack"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><span class="no">٢</span>Akomodasi &amp; Penerbangan</h2>
+        <div class="grid2">
+          <div class="field"><label>Hotel Makkah</label><input type="text" id="bhMakkah" placeholder="Snood Ajayd"></div>
+          <div class="field"><label>Hotel Madinah</label><input type="text" id="bhMadinah" placeholder="Odest"></div>
+          <div class="field"><label>Hotel Jakarta</label><input type="text" id="bhJakarta" placeholder="Citadines"></div>
+          <div class="field"><label>Pesawat</label><input type="text" id="bhPesawat" placeholder="Saudi Airlines"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><span class="no">٣</span>Rincian Biaya <span style="font-weight:500;text-transform:none;letter-spacing:0;color:var(--ink-soft);font-size:11px">— nilai asing dikonversi otomatis ke rupiah</span></h2>
+        <div style="overflow-x:auto">
+        <table class="comp">
+          <thead><tr>
+            <th style="width:24px"></th><th>Komponen</th><th style="width:78px">Mata Uang</th>
+            <th class="r" style="width:120px">Harga Satuan</th><th class="r" style="width:70px">Durasi</th>
+            <th class="r" style="width:70px">Jumlah</th><th class="r" style="width:130px">Total (IDR)</th><th style="width:30px"></th>
+          </tr></thead>
+          <tbody id="compBody"></tbody>
+        </table>
+        </div>
+        <button class="add-btn" id="addComp">+ Tambah komponen</button>
+
+        <div class="result">
+          <div class="rbox"><div class="k">Total Biaya</div><div class="v" id="rTotal">Rp 0</div></div>
+          <div class="rbox"><div class="k">Harga Pokok / pax</div><div class="v" id="rPokok">Rp 0</div></div>
+          <div class="rbox"><div class="k">Fee Referal / pax</div><div class="v" id="rFee">Rp 0</div></div>
+          <div class="rbox"><div class="k">Margin / pax</div><div class="v" id="rMargin">Rp 0</div></div>
+        </div>
+
+        <div class="roomprices">
+          <div class="rp-box"><div class="t">Quad</div><div class="p" id="pQuad">Rp 0</div><div class="s">harga jual / pax</div></div>
+          <div class="rp-box"><div class="t">Triple</div><div class="p" id="pTriple">Rp 0</div><div class="s" id="sTriple">+ Rp 0</div></div>
+          <div class="rp-box"><div class="t">Double</div><div class="p" id="pDouble">Rp 0</div><div class="s" id="sDouble">+ Rp 0</div></div>
+        </div>
+        <p class="hint">Quad = Harga Pokok/pax + Fee Referal + Margin. Triple &amp; Double = Quad + selisih tipe kamar (atur di Pengaturan Harga). Kurs, fee &amp; margin diambil dari Pengaturan Harga.</p>
+      </div>
+
+      <div class="save-bar">
+        <span class="flash" id="buatFlash">✓ Tersimpan</span>
+        <button class="btn btn-ghost" id="btnCancelBuat">Batal</button>
+        <button class="btn btn-emerald" id="btnSaveBuat">Simpan Penawaran</button>
+      </div>
+    </section>
+
+    <!-- ============ SETTING ============ -->
     <section class="view" id="view-setting">
       <div class="card">
-        <h2><span class="no">١</span>Paket Dasar</h2>
+        <h2><span class="no">١</span>Kurs, Fee &amp; Margin</h2>
+        <div class="grid3">
+          <div class="field"><label>Kurs USD → IDR</label><div class="price-wrap"><span class="rp">Rp</span><input type="number" id="sKursUsd"></div></div>
+          <div class="field"><label>Kurs SAR (Real) → IDR</label><div class="price-wrap"><span class="rp">Rp</span><input type="number" id="sKursSar"></div></div>
+          <div class="field"><label>Fee Referal / pax</label><div class="price-wrap"><span class="rp">Rp</span><input type="number" id="sFee"></div></div>
+          <div class="field"><label>Margin / pax</label><div class="price-wrap"><span class="rp">Rp</span><input type="number" id="sMargin"></div></div>
+          <div class="field"><label>Selisih Triple (dari Quad)</label><div class="price-wrap"><span class="rp">Rp</span><input type="number" id="sTripleAdd"></div></div>
+          <div class="field"><label>Selisih Double (dari Quad)</label><div class="price-wrap"><span class="rp">Rp</span><input type="number" id="sDoubleAdd"></div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><span class="no">٢</span>Master Komponen Biaya</h2>
+        <div style="overflow-x:auto">
+        <table class="comp">
+          <thead><tr>
+            <th style="width:24px"></th><th>Komponen</th><th style="width:78px">Mata Uang</th>
+            <th class="r" style="width:120px">Harga Satuan</th><th class="r" style="width:70px">Durasi</th>
+            <th class="r" style="width:70px">Jumlah</th><th style="width:30px"></th>
+          </tr></thead>
+          <tbody id="mCompBody"></tbody>
+        </table>
+        </div>
+        <button class="add-btn" data-mtarget="mCompBody">+ Tambah komponen</button>
+        <p class="hint">Nilai default (durasi/jumlah) dipakai saat membuat penawaran baru, lalu bisa disesuaikan per jamaah. Kolom "Jumlah" untuk hotel = jumlah kamar; untuk item lain umumnya = jumlah pax.</p>
+      </div>
+
+      <div class="card">
+        <h2><span class="no">٣</span>Daftar Fasilitas (untuk nota)</h2>
         <div class="grid2">
-          <div class="field"><label>Hotel Makkah</label><input type="text" id="sMakkah"></div>
-          <div class="field"><label>Hotel Madinah</label><input type="text" id="sMadinah"></div>
-          <div class="field"><label>Hotel Jakarta</label><input type="text" id="sJakarta"></div>
-          <div class="field"><label>Pesawat</label><input type="text" id="sPesawat"></div>
-          <div class="field"><label>Harga Dasar Paket (headline)</label>
-            <div class="price-wrap"><span class="rp">Rp</span><input type="number" id="sBase" step="100000"></div>
+          <div>
+            <label style="display:block;margin-bottom:8px;color:var(--emerald);font-weight:700;font-size:12px;text-transform:uppercase">Harga Termasuk</label>
+            <div class="rows" id="incRows"></div>
+            <button class="add-btn" data-ltarget="incRows">+ Tambah</button>
           </div>
-          <div class="field"><label>Keterangan Harga</label><input type="text" id="sKet"></div>
+          <div>
+            <label style="display:block;margin-bottom:8px;color:var(--emerald);font-weight:700;font-size:12px;text-transform:uppercase">Harga Belum Termasuk</label>
+            <div class="rows" id="excRows"></div>
+            <button class="add-btn" data-ltarget="excRows">+ Tambah</button>
+          </div>
         </div>
       </div>
 
-      <div class="card">
-        <h2><span class="no">٢</span>Komponen Harga Termasuk</h2>
-        <div class="rows-head"><span>Aktif</span><span>Nama Komponen</span><span>Harga (opsional)</span><span></span></div>
-        <div class="rows" id="incRows"></div>
-        <button class="add-btn" data-target="incRows">+ Tambah komponen termasuk</button>
-      </div>
-
-      <div class="card">
-        <h2><span class="no">٣</span>Komponen Tidak Termasuk</h2>
-        <div class="rows-head"><span>Aktif</span><span>Nama Komponen</span><span>Estimasi (opsional)</span><span></span></div>
-        <div class="rows" id="excRows"></div>
-        <button class="add-btn" data-target="excRows">+ Tambah komponen tidak termasuk</button>
-      </div>
-
-      <div class="card">
-        <h2><span class="no">٤</span>Ringkasan Harga</h2>
-        <div class="totals">
-          <div class="tbox main"><div class="k">Harga Dasar Paket</div><div class="n" id="tBase">Rp 0</div></div>
-          <div class="tbox"><div class="k">Subtotal Komponen Termasuk</div><div class="n" id="tInc">Rp 0</div></div>
-          <div class="tbox"><div class="k">Estimasi Tidak Termasuk</div><div class="n" id="tExc">Rp 0</div></div>
-        </div>
-        <p class="hint">Subtotal komponen bersifat informatif (rincian internal). Harga yang tampil di penawaran memakai <b>Harga Dasar Paket</b>, dan bisa diganti per jamaah saat membuat penawaran.</p>
-        <div class="save-bar">
-          <span class="saved-flash" id="savedFlash">✓ Pengaturan tersimpan</span>
-          <button class="btn btn-emerald" id="btnSaveSettings">Simpan Pengaturan</button>
-        </div>
+      <div class="save-bar">
+        <span class="flash" id="setFlash">✓ Pengaturan tersimpan</span>
+        <button class="btn btn-emerald" id="btnSaveSet">Simpan Pengaturan</button>
       </div>
     </section>
   </div>
 
-  <!-- ================= MODAL ================= -->
-  <div class="overlay" id="overlay">
+  <!-- ===== PAYMENT MODAL ===== -->
+  <div class="overlay" id="payOverlay">
     <div class="modal">
-      <div class="modal-head">
-        <h3 id="modalTitle">Buat Penawaran Baru</h3>
-        <button class="x" id="modalX">&times;</button>
-      </div>
+      <div class="modal-head"><h3>Kelola Pembayaran</h3><button class="x" id="payX">&times;</button></div>
       <div class="modal-body">
-        <input type="hidden" id="mId">
-        <div class="card">
-          <div class="grid2">
-            <div class="field full"><label>Nama Calon Jamaah</label><input type="text" id="mNama" placeholder="Bapak Ahmad Fauzi"></div>
-            <div class="field"><label>Program</label><input type="text" id="mProgram" placeholder="Umroh Reguler 9 Hari"></div>
-            <div class="field"><label>Kelas</label><input type="text" id="mKelas" placeholder="Quad / Triple / Double"></div>
-            <div class="field"><label>No. HP</label><input type="tel" id="mHp" placeholder="0812-xxxx-xxxx"></div>
-            <div class="field"><label>Tanggal Berangkat</label><input type="date" id="mTgl"></div>
-            <div class="field full"><label>Harga Paket (headline)</label>
-              <div class="price-wrap"><span class="rp">Rp</span><input type="number" id="mHarga" step="100000"></div>
-            </div>
-          </div>
+        <input type="hidden" id="payOfferId">
+        <div class="field" style="margin-bottom:12px"><label>Pilih Tipe Kamar</label>
+          <select id="payRoom"><option value="quad">Quad</option><option value="triple">Triple</option><option value="double">Double</option></select>
         </div>
-        <div class="card">
-          <label style="display:block;margin-bottom:8px;color:var(--emerald);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.6px">Harga Termasuk</label>
-          <div class="mchecks" id="mInc"></div>
+        <div style="background:var(--paper);border:1px solid var(--line);border-radius:9px;padding:11px 13px;font-size:13px;margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between"><span>Harga / pax</span><b id="payPerPax">Rp 0</b></div>
+          <div style="display:flex;justify-content:space-between;margin-top:3px"><span id="payPaxLbl">Total tagihan</span><b id="payTotal" style="color:var(--emerald)">Rp 0</b></div>
         </div>
-        <div class="card">
-          <label style="display:block;margin-bottom:8px;color:var(--emerald);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.6px">Harga Tidak Termasuk</label>
-          <div class="mchecks" id="mExc"></div>
+        <div class="grid3" style="grid-template-columns:1fr 1fr 1fr">
+          <div class="field"><label>Tanggal</label><input type="date" id="payDate"></div>
+          <div class="field"><label>Jenis</label><select id="payType"><option>DP</option><option>Pelunasan</option><option>Cicilan</option></select></div>
+          <div class="field"><label>Nominal</label><div class="price-wrap"><span class="rp">Rp</span><input type="number" id="payAmt"></div></div>
+        </div>
+        <button class="btn btn-emerald btn-sm" id="payAdd" style="margin-top:10px">+ Catat Pembayaran</button>
+        <div class="pay-list" id="payList"></div>
+        <div style="display:flex;justify-content:space-between;font-size:14px;margin-top:12px;padding-top:10px;border-top:2px solid var(--line)">
+          <span>Sisa</span><b id="paySisa" style="color:var(--danger)">Rp 0</b>
         </div>
       </div>
       <div class="modal-foot">
-        <button class="btn btn-ghost" id="modalCancel">Batal</button>
-        <button class="btn btn-emerald" id="modalSave">Simpan Penawaran</button>
+        <button class="btn btn-ghost" id="payClose">Tutup</button>
+        <button class="btn btn-blue" id="payNota">Cetak Nota Pembayaran</button>
       </div>
     </div>
+  </div>
+
+  <!-- ===== NOTA (print) ===== -->
+  <div class="nota-view" id="notaView">
+    <div class="nota-actions">
+      <button class="btn btn-emerald btn-sm" onclick="window.print()">🖨 Cetak / PDF</button>
+      <button class="btn btn-ghost btn-sm" id="notaClose" style="background:#fff">Tutup</button>
+    </div>
+    <div class="nota" id="notaContent"></div>
   </div>
 
   <div class="toast" id="toast"></div>
 
 <script>
-  // ---------- defaults ----------
-  const DEFAULT_SETTINGS = {
-    makkah:"Maysan Al Maqam / Setaraf", madinah:"Jawharat Arasyed / Setaraf",
-    jakarta:"Ibis", pesawat:"Saudi Airlines", base:36500000, ket:"All in dari Kuningan",
-    inc:[
-      "Tiket Ekonomi PP","Visa Umroh","Transportasi AC","Hotel Sesuai Paket",
-      "Makan 3x Sehari (Fullboard)","Zam-zam 5 Liter","Handling Jakarta","Handling Saudi",
-      "Muthawif","City Tour Makkah, Madinah & Jeddah","Manasik 1 Kali","Perlengkapan","Transport Kuningan PP"
-    ].map(n=>({name:n,price:0,active:true})),
-    exc:[
-      "Pembuatan Paspor","Suntik Meningitis & Polio","Pengeluaran Pribadi","Over Bagasi"
-    ].map(n=>({name:n,price:0,active:true}))
+  // ================= DEFAULT SETTINGS =================
+  const DEFAULT = {
+    kursUsd:16000, kursSar:4600, fee:3000000, margin:5000000,
+    tripleAdd:2000000, doubleAdd:3500000,
+    components:[
+      {name:'Hotel Makkah',cur:'SAR',price:2400,dur:4,qty:2,active:true},
+      {name:'Hotel Madinah',cur:'SAR',price:2400,dur:3,qty:2,active:true},
+      {name:'Visa Umrah',cur:'SAR',price:215,dur:1,qty:5,active:true},
+      {name:'Transport',cur:'SAR',price:2800,dur:1,qty:1,active:true},
+      {name:'Tiket Pesawat',cur:'IDR',price:16500000,dur:1,qty:5,active:true},
+      {name:'Muthawif',cur:'SAR',price:250,dur:8,qty:1,active:true},
+      {name:'Ground Service',cur:'SAR',price:250,dur:1,qty:5,active:true},
+      {name:'Handling Saudi',cur:'SAR',price:200,dur:1,qty:5,active:true},
+      {name:'Handling Jakarta',cur:'IDR',price:150000,dur:1,qty:5,active:true},
+      {name:'Asuransi',cur:'IDR',price:100000,dur:1,qty:5,active:true},
+      {name:'Perlengkapan Umroh',cur:'IDR',price:950000,dur:1,qty:5,active:true},
+      {name:'Hotel Jakarta',cur:'IDR',price:300000,dur:1,qty:5,active:true},
+      {name:'Manasik',cur:'IDR',price:150000,dur:1,qty:0,active:false},
+      {name:'Transport Daerah',cur:'IDR',price:500000,dur:1,qty:0,active:false},
+      {name:'Lounge Jakarta',cur:'IDR',price:175000,dur:1,qty:0,active:false},
+      {name:'Lounge Saudi',cur:'SAR',price:250,dur:1,qty:0,active:false}
+    ],
+    inc:['Tiket Pesawat PP Sesuai Paket','Hotel Sesuai Paket','Visa Umrah','Transport Full Paket','Muthawif','Ground Service','Asuransi','Handling Jakarta','Handling Saudi','Hotel Jakarta'].map(n=>({name:n,active:true})),
+    exc:['Pembuatan Paspor','Suntik Meningitis dan Polio','Perlengkapan Umroh','Transport Daerah','Manasik Umroh','Pengeluaran yang Bersifat Pribadi'].map(n=>({name:n,active:true}))
   };
 
-  // ---------- storage (graceful: works locally, degrades in sandbox) ----------
-  const store = {
-    get(k,f){ try{const v=localStorage.getItem(k);return v?JSON.parse(v):f;}catch(e){return f;} },
-    set(k,v){ try{localStorage.setItem(k,JSON.stringify(v));}catch(e){/* memory-only fallback */} }
-  };
-  let settings = store.get('umroh_settings', JSON.parse(JSON.stringify(DEFAULT_SETTINGS)));
-  let offers   = store.get('umroh_offers', []);
+  const store={get(k,f){try{const v=localStorage.getItem(k);return v?JSON.parse(v):f}catch(e){return f}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+  let S = store.get('umroh_settings2', JSON.parse(JSON.stringify(DEFAULT)));
+  let offers = store.get('umroh_offers2', []);
 
-  // ---------- helpers ----------
-  const $ = id => document.getElementById(id);
-  const rupiah = n => 'Rp ' + (Number(n)||0).toLocaleString('id-ID');
-  function fmtDate(v){ if(!v) return '—'; const d=new Date(v+'T00:00:00'); return d.toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'}); }
-  function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2200); }
+  const $=id=>document.getElementById(id);
+  const rupiah=n=>'Rp '+(Math.round(Number(n)||0)).toLocaleString('id-ID');
+  const kursOf=cur=>cur==='USD'?(Number(S.kursUsd)||0):cur==='SAR'?(Number(S.kursSar)||0):1;
+  function fmtDate(v){if(!v)return'—';const d=new Date(v+'T00:00:00');return d.toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'})}
+  function fmtRange(a,b){if(!a)return'—';const o={day:'numeric',month:'long',year:'numeric'};const da=new Date(a+'T00:00:00');if(!b)return da.toLocaleDateString('id-ID',o);const db=new Date(b+'T00:00:00');return da.toLocaleDateString('id-ID',{day:'numeric',month:'long'})+' – '+db.toLocaleDateString('id-ID',o)}
+  function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2200)}
+  function esc(s){return(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
 
-  // ---------- tabs ----------
+  // ================= TABS =================
   document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
     document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
     document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
-    t.classList.add('active'); $('view-'+t.dataset.view).classList.add('active');
+    t.classList.add('active');$('view-'+t.dataset.view).classList.add('active');
   }));
+  function goTab(name){document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.view===name));document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));$('view-'+name).classList.add('active');window.scrollTo(0,0)}
 
-  // ================= SETTINGS UI =================
-  function fillSettingsForm(){
-    $('sMakkah').value=settings.makkah; $('sMadinah').value=settings.madinah;
-    $('sJakarta').value=settings.jakarta; $('sPesawat').value=settings.pesawat;
-    $('sBase').value=settings.base; $('sKet').value=settings.ket;
-    renderRows('incRows',settings.inc); renderRows('excRows',settings.exc);
-    recalc();
+  // ================= COMPONENT ROW =================
+  function compRow(item,onchange){
+    const tr=document.createElement('tr'); if(!item.active)tr.classList.add('off');
+    tr.innerHTML=`<td><input type="checkbox" ${item.active?'checked':''}></td>`
+      +`<td><input type="text" class="cname" value="${esc(item.name)}"></td>`
+      +`<td><select class="ccur cur">${['IDR','USD','SAR'].map(c=>`<option ${item.cur===c?'selected':''}>${c}</option>`).join('')}</select></td>`
+      +`<td><input type="number" class="cprice num" value="${item.price||0}"></td>`
+      +`<td><input type="number" class="cdur num" value="${item.dur||1}"></td>`
+      +`<td><input type="number" class="cqty num" value="${item.qty||0}"></td>`
+      +`<td class="total ctotal r">Rp 0</td>`
+      +`<td><button class="del" type="button">&times;</button></td>`;
+    const chk=tr.querySelector('input[type=checkbox]');
+    chk.addEventListener('change',()=>{tr.classList.toggle('off',!chk.checked);onchange&&onchange()});
+    tr.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',onchange||(()=>{})));
+    tr.querySelector('.del').addEventListener('click',()=>{tr.remove();onchange&&onchange()});
+    tr._read=()=>({name:tr.querySelector('.cname').value.trim(),cur:tr.querySelector('.ccur').value,price:Number(tr.querySelector('.cprice').value)||0,dur:Number(tr.querySelector('.cdur').value)||0,qty:Number(tr.querySelector('.cqty').value)||0,active:chk.checked});
+    tr._setTotal=v=>{tr.querySelector('.ctotal').textContent=rupiah(v)};
+    return tr;
   }
-  function renderRows(boxId,arr){
-    const box=$(boxId); box.innerHTML='';
-    arr.forEach(item=>box.appendChild(makePriceRow(item)));
-  }
-  function makePriceRow(item){
-    const row=document.createElement('div');
-    row.className='prow'+(item.active?'':' off');
-    const cb=document.createElement('input'); cb.type='checkbox'; cb.checked=item.active;
-    const name=document.createElement('input'); name.type='text'; name.className='name'; name.value=item.name;
-    const pc=document.createElement('div'); pc.className='price-cell';
-    const rp=document.createElement('span'); rp.className='rp'; rp.textContent='Rp';
-    const price=document.createElement('input'); price.type='number'; price.step='50000'; price.value=item.price||''; price.placeholder='0';
-    pc.append(rp,price);
-    const del=document.createElement('button'); del.className='del'; del.type='button'; del.innerHTML='&times;';
-    cb.addEventListener('change',()=>{row.classList.toggle('off',!cb.checked);recalc();});
-    price.addEventListener('input',recalc);
-    del.addEventListener('click',()=>{row.remove();recalc();});
-    row.append(cb,name,pc,del);
-    // stash refs for reading
-    row._read = ()=>({name:name.value.trim(),price:Number(price.value)||0,active:cb.checked});
-    return row;
-  }
-  function readRows(boxId){
-    return [...$(boxId).children].map(r=>r._read()).filter(x=>x.name);
-  }
-  function recalc(){
-    const base=Number($('sBase').value)||0;
-    const inc=readRows('incRows').filter(x=>x.active).reduce((s,x)=>s+x.price,0);
-    const exc=readRows('excRows').filter(x=>x.active).reduce((s,x)=>s+x.price,0);
-    $('tBase').textContent=rupiah(base);
-    $('tInc').textContent=rupiah(inc);
-    $('tExc').textContent=rupiah(exc);
-  }
-  document.querySelectorAll('.add-btn').forEach(b=>b.addEventListener('click',()=>{
-    $(b.dataset.target).appendChild(makePriceRow({name:'',price:0,active:true}));
-  }));
-  $('sBase').addEventListener('input',recalc);
+  function readComp(bodyId){return[...$(bodyId).children].map(r=>r._read()).filter(x=>x.name)}
 
-  $('btnSaveSettings').addEventListener('click',()=>{
-    settings={
-      makkah:$('sMakkah').value.trim(),madinah:$('sMadinah').value.trim(),
-      jakarta:$('sJakarta').value.trim(),pesawat:$('sPesawat').value.trim(),
-      base:Number($('sBase').value)||0,ket:$('sKet').value.trim(),
-      inc:readRows('incRows'),exc:readRows('excRows')
+  // ================= CALCULATOR =================
+  function loadCalcRows(comps){const b=$('compBody');b.innerHTML='';comps.forEach(c=>b.appendChild(compRow(c,recalcBuat)))}
+  function recalcBuat(){
+    let total=0;
+    [...$('compBody').children].forEach(tr=>{const d=tr._read();const line=d.active?d.price*d.dur*d.qty*kursOf(d.cur):0;tr._setTotal(line);total+=line});
+    const jml=Number($('bJumlah').value)||1;
+    const pokok=total/jml, fee=Number(S.fee)||0, margin=Number(S.margin)||0;
+    const quad=pokok+fee+margin, triple=quad+(Number(S.tripleAdd)||0), double=quad+(Number(S.doubleAdd)||0);
+    $('rTotal').textContent=rupiah(total);$('rPokok').textContent=rupiah(pokok);
+    $('rFee').textContent=rupiah(fee);$('rMargin').textContent=rupiah(margin);
+    $('pQuad').textContent=rupiah(quad);$('pTriple').textContent=rupiah(triple);$('pDouble').textContent=rupiah(double);
+    $('sTriple').textContent='+ '+rupiah(S.tripleAdd);$('sDouble').textContent='+ '+rupiah(S.doubleAdd);
+    return {total,pokok,quad,triple,double};
+  }
+  $('bJumlah').addEventListener('input',recalcBuat);
+  $('addComp').addEventListener('click',()=>{$('compBody').appendChild(compRow({name:'',cur:'IDR',price:0,dur:1,qty:1,active:true},recalcBuat));recalcBuat()});
+
+  function newOffer(){
+    $('bId').value='';$('bNama').value='';$('bHp').value='';$('bProgram').value='9 Hari';
+    $('bJumlah').value=5;$('bBandara').value='Soekarno Hatta';$('bTglGo').value='';$('bTglBack').value='';
+    $('bhMakkah').value='';$('bhMadinah').value='';$('bhJakarta').value='';$('bhPesawat').value='Saudi Airlines';
+    loadCalcRows(JSON.parse(JSON.stringify(S.components)));recalcBuat();goTab('buat');
+  }
+  function editOffer(o){
+    $('bId').value=o.id;$('bNama').value=o.nama;$('bHp').value=o.hp||'';$('bProgram').value=o.program;
+    $('bJumlah').value=o.jumlah;$('bBandara').value=o.bandara||'';$('bTglGo').value=o.tglGo||'';$('bTglBack').value=o.tglBack||'';
+    $('bhMakkah').value=o.hMakkah||'';$('bhMadinah').value=o.hMadinah||'';$('bhJakarta').value=o.hJakarta||'';$('bhPesawat').value=o.hPesawat||'';
+    loadCalcRows(o.components&&o.components.length?o.components:JSON.parse(JSON.stringify(S.components)));recalcBuat();goTab('buat');
+  }
+  $('btnNew').addEventListener('click',newOffer);
+  $('btnCancelBuat').addEventListener('click',()=>goTab('rekap'));
+  $('btnSaveBuat').addEventListener('click',()=>{
+    const nama=$('bNama').value.trim();
+    if(!nama){toast('Nama jamaah wajib diisi');$('bNama').focus();return}
+    const r=recalcBuat();
+    const id=$('bId').value||('o_'+Date.now());
+    const existing=offers.find(o=>o.id===id);
+    const data={
+      id,nama,hp:$('bHp').value.trim(),program:$('bProgram').value.trim(),
+      jumlah:Number($('bJumlah').value)||1,bandara:$('bBandara').value.trim(),
+      tglGo:$('bTglGo').value,tglBack:$('bTglBack').value,
+      hMakkah:$('bhMakkah').value.trim(),hMadinah:$('bhMadinah').value.trim(),
+      hJakarta:$('bhJakarta').value.trim(),hPesawat:$('bhPesawat').value.trim(),
+      components:readComp('compBody'),
+      prices:{quad:Math.round(r.quad),triple:Math.round(r.triple),double:Math.round(r.double)},
+      inc:S.inc.filter(x=>x.active).map(x=>x.name),
+      exc:S.exc.filter(x=>x.active).map(x=>x.name),
+      payments:existing?existing.payments:[],payRoom:existing?existing.payRoom:'quad',ts:Date.now()
     };
-    store.set('umroh_settings',settings);
-    const f=$('savedFlash'); f.classList.add('show'); setTimeout(()=>f.classList.remove('show'),1800);
-    toast('Pengaturan harga tersimpan');
+    const i=offers.findIndex(o=>o.id===id);
+    if(i>=0)offers[i]=data;else offers.unshift(data);
+    store.set('umroh_offers2',offers);
+    const f=$('buatFlash');f.classList.add('show');setTimeout(()=>f.classList.remove('show'),1600);
+    toast(i>=0?'Penawaran diperbarui':'Penawaran tersimpan');renderTable();goTab('rekap');
   });
 
-  // ================= REKAP UI =================
+  // ================= SETTINGS =================
+  function fillSettings(){
+    $('sKursUsd').value=S.kursUsd;$('sKursSar').value=S.kursSar;$('sFee').value=S.fee;$('sMargin').value=S.margin;
+    $('sTripleAdd').value=S.tripleAdd;$('sDoubleAdd').value=S.doubleAdd;
+    const mb=$('mCompBody');mb.innerHTML='';S.components.forEach(c=>mb.appendChild(compRow(c,null)));
+    loadLabelRows('incRows',S.inc);loadLabelRows('excRows',S.exc);
+  }
+  function labelRow(item){
+    const row=document.createElement('div');row.className='lrow'+(item.active?'':' off');
+    const cb=document.createElement('input');cb.type='checkbox';cb.checked=item.active;
+    const t=document.createElement('input');t.type='text';t.className='t';t.value=item.name;
+    const del=document.createElement('button');del.className='del';del.type='button';del.innerHTML='&times;';
+    cb.addEventListener('change',()=>row.classList.toggle('off',!cb.checked));
+    del.addEventListener('click',()=>row.remove());
+    row.append(cb,t,del);row._read=()=>({name:t.value.trim(),active:cb.checked});return row;
+  }
+  function loadLabelRows(id,arr){const b=$(id);b.innerHTML='';arr.forEach(x=>b.appendChild(labelRow(x)))}
+  function readLabels(id){return[...$(id).children].map(r=>r._read()).filter(x=>x.name)}
+  document.querySelectorAll('[data-mtarget]').forEach(b=>b.addEventListener('click',()=>{$(b.dataset.mtarget).appendChild(compRow({name:'',cur:'IDR',price:0,dur:1,qty:0,active:true},null))}));
+  document.querySelectorAll('[data-ltarget]').forEach(b=>b.addEventListener('click',()=>{$(b.dataset.ltarget).appendChild(labelRow({name:'',active:true}))}));
+  $('btnSaveSet').addEventListener('click',()=>{
+    S.kursUsd=Number($('sKursUsd').value)||0;S.kursSar=Number($('sKursSar').value)||0;
+    S.fee=Number($('sFee').value)||0;S.margin=Number($('sMargin').value)||0;
+    S.tripleAdd=Number($('sTripleAdd').value)||0;S.doubleAdd=Number($('sDoubleAdd').value)||0;
+    S.components=readComp('mCompBody');S.inc=readLabels('incRows');S.exc=readLabels('excRows');
+    store.set('umroh_settings2',S);
+    const f=$('setFlash');f.classList.add('show');setTimeout(()=>f.classList.remove('show'),1600);toast('Pengaturan tersimpan');
+  });
+
+  // ================= REKAP =================
+  function paidOf(o){return(o.payments||[]).reduce((s,p)=>s+(Number(p.nominal)||0),0)}
+  function totalOf(o){const price=o.prices?o.prices[o.payRoom||'quad']:0;return price*(o.jumlah||1)}
+  function statusOf(o){const paid=paidOf(o),tot=totalOf(o);if(tot>0&&paid>=tot)return'lunas';if(paid>0)return'dp';return'belum'}
   function renderTable(){
     const q=$('q').value.trim().toLowerCase();
-    const list=offers.filter(o=>!q || (o.nama+o.program+o.hp+o.kelas).toLowerCase().includes(q));
-    const tb=$('tbody'); tb.innerHTML='';
-    $('emptyState').style.display = offers.length ? 'none':'block';
+    const list=offers.filter(o=>!q||(o.nama+o.program).toLowerCase().includes(q));
+    const tb=$('tbody');tb.innerHTML='';$('emptyState').style.display=offers.length?'none':'block';
     list.forEach(o=>{
+      const st=statusOf(o);const stTxt={lunas:'Lunas',dp:'DP / Cicilan',belum:'Belum Bayar'}[st];
       const tr=document.createElement('tr');
-      tr.innerHTML=`
-        <td class="nama">${esc(o.nama)||'—'}</td>
-        <td class="hide">${esc(o.program)||'—'}</td>
-        <td>${esc(o.kelas)||'—'}</td>
-        <td class="hide">${esc(o.hp)||'—'}</td>
-        <td class="hide">${fmtDate(o.tgl)}</td>
-        <td class="harga">${rupiah(o.harga)}</td>
-        <td class="act">
-          <button class="btn btn-ghost btn-sm" data-edit="${o.id}">Edit</button>
-          <button class="btn btn-danger-ghost btn-sm" data-del="${o.id}">Hapus</button>
-        </td>`;
+      tr.innerHTML=`<td class="nama">${esc(o.nama)}</td><td>${esc(o.program)||'—'}</td><td>${o.jumlah} pax</td>`
+        +`<td>${fmtDate(o.tglGo)}</td><td class="harga">${rupiah(o.prices?o.prices.quad:0)}</td>`
+        +`<td><span class="badge ${st}">${stTxt}</span></td>`
+        +`<td class="act"><button class="btn btn-ghost btn-sm" data-nota="${o.id}">Nota</button>`
+        +`<button class="btn btn-blue btn-sm" data-pay="${o.id}">Bayar</button>`
+        +`<button class="btn btn-ghost btn-sm" data-edit="${o.id}">Edit</button>`
+        +`<button class="btn btn-danger-ghost btn-sm" data-del="${o.id}">Hapus</button></td>`;
       tb.appendChild(tr);
     });
-    // stats
     $('stCount').textContent=offers.length;
-    const total=offers.reduce((s,o)=>s+(Number(o.harga)||0),0);
-    $('stValue').textContent=rupiah(total);
-    $('stAvg').textContent=offers.length?rupiah(Math.round(total/offers.length)):'Rp 0';
+    let paid=0,due=0,lunas=0;
+    offers.forEach(o=>{const p=paidOf(o),t=totalOf(o);paid+=p;due+=Math.max(0,t-p);if(statusOf(o)==='lunas')lunas++});
+    $('stPaid').textContent=rupiah(paid);$('stDue').textContent=rupiah(due);$('stLunas').textContent=lunas;
   }
-  function esc(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
-
   $('q').addEventListener('input',renderTable);
   $('tbody').addEventListener('click',e=>{
-    const ed=e.target.dataset.edit, dl=e.target.dataset.del;
-    if(ed) openModal(offers.find(o=>o.id===ed));
-    if(dl){ if(confirm('Hapus penawaran ini?')){ offers=offers.filter(o=>o.id!==dl); persistOffers(); renderTable(); toast('Penawaran dihapus'); } }
+    const b=e.target.closest('button');if(!b)return;
+    const {edit,del,nota,pay}=b.dataset;
+    if(edit)editOffer(offers.find(o=>o.id===edit));
+    if(del){if(confirm('Hapus penawaran ini?')){offers=offers.filter(o=>o.id!==del);store.set('umroh_offers2',offers);renderTable();toast('Dihapus')}}
+    if(nota)showNotaPenawaran(offers.find(o=>o.id===nota));
+    if(pay)openPay(offers.find(o=>o.id===pay));
   });
-  function persistOffers(){ store.set('umroh_offers',offers); }
 
-  // ================= MODAL =================
-  function openModal(offer){
-    $('modalTitle').textContent = offer ? 'Edit Penawaran' : 'Buat Penawaran Baru';
-    $('mId').value = offer?offer.id:'';
-    $('mNama').value = offer?offer.nama:'';
-    $('mProgram').value = offer?offer.program:'';
-    $('mKelas').value = offer?offer.kelas:'';
-    $('mHp').value = offer?offer.hp:'';
-    $('mTgl').value = offer?offer.tgl:'';
-    $('mHarga').value = offer?offer.harga:settings.base;
-    // checklists from active settings; per-offer selection remembered on edit
-    buildChecks('mInc', settings.inc, offer?offer.inc:null);
-    buildChecks('mExc', settings.exc, offer?offer.exc:null);
-    $('overlay').classList.add('open');
+  // ================= PAYMENT =================
+  let curPay=null;
+  function openPay(o){curPay=o;$('payOfferId').value=o.id;$('payRoom').value=o.payRoom||'quad';$('payDate').value=new Date().toISOString().slice(0,10);renderPay();$('payOverlay').classList.add('open')}
+  function renderPay(){
+    const o=curPay;const room=$('payRoom').value;const perPax=o.prices?o.prices[room]:0;const tot=perPax*(o.jumlah||1);
+    $('payPerPax').textContent=rupiah(perPax);$('payPaxLbl').textContent=`Total tagihan (${o.jumlah} pax)`;$('payTotal').textContent=rupiah(tot);
+    const paid=paidOf(o);const list=$('payList');list.innerHTML='';
+    (o.payments||[]).forEach((p,i)=>{const row=document.createElement('div');row.className='prow2';row.innerHTML=`<span>${fmtDate(p.tgl)} · ${esc(p.jenis)}</span><span><b>${rupiah(p.nominal)}</b> <button class="del" data-i="${i}">hapus</button></span>`;list.appendChild(row)});
+    $('paySisa').textContent=rupiah(Math.max(0,tot-paid));$('paySisa').style.color=(tot>0&&paid>=tot)?'var(--ok)':'var(--danger)';
   }
-  function buildChecks(boxId, master, selected){
-    const box=$(boxId); box.innerHTML='';
-    master.filter(m=>m.active).forEach(m=>{
-      const id=boxId+'_'+Math.random().toString(36).slice(2,7);
-      const wrap=document.createElement('label'); wrap.className='mcheck'; wrap.setAttribute('for',id);
-      const cb=document.createElement('input'); cb.type='checkbox'; cb.id=id; cb.dataset.name=m.name;
-      cb.checked = selected ? selected.includes(m.name) : true;
-      const span=document.createElement('span'); span.textContent=m.name;
-      wrap.append(cb,span);
-      if(m.price>0){ const p=document.createElement('span'); p.className='p'; p.textContent=rupiah(m.price); wrap.append(p); }
-      box.appendChild(wrap);
-    });
-  }
-  function readChecks(boxId){
-    return [...$(boxId).querySelectorAll('input:checked')].map(c=>c.dataset.name);
-  }
-  function closeModal(){ $('overlay').classList.remove('open'); }
-
-  $('btnNew').addEventListener('click',()=>openModal(null));
-  $('modalX').addEventListener('click',closeModal);
-  $('modalCancel').addEventListener('click',closeModal);
-  $('overlay').addEventListener('click',e=>{ if(e.target===$('overlay')) closeModal(); });
-
-  $('modalSave').addEventListener('click',()=>{
-    const nama=$('mNama').value.trim();
-    if(!nama){ toast('Nama jamaah wajib diisi'); $('mNama').focus(); return; }
-    const data={
-      id:$('mId').value||('o_'+Date.now()),
-      nama, program:$('mProgram').value.trim(), kelas:$('mKelas').value.trim(),
-      hp:$('mHp').value.trim(), tgl:$('mTgl').value, harga:Number($('mHarga').value)||0,
-      inc:readChecks('mInc'), exc:readChecks('mExc'),
-      hotel:{makkah:settings.makkah,madinah:settings.madinah,jakarta:settings.jakarta,pesawat:settings.pesawat},
-      ket:settings.ket, ts:Date.now()
-    };
-    const i=offers.findIndex(o=>o.id===data.id);
-    if(i>=0) offers[i]=data; else offers.unshift(data);
-    persistOffers(); renderTable(); closeModal();
-    toast(i>=0?'Penawaran diperbarui':'Penawaran tersimpan');
+  $('payRoom').addEventListener('change',()=>{curPay.payRoom=$('payRoom').value;persistPay();renderPay();renderTable()});
+  $('payList').addEventListener('click',e=>{const b=e.target.closest('.del');if(!b)return;curPay.payments.splice(Number(b.dataset.i),1);persistPay();renderPay();renderTable()});
+  $('payAdd').addEventListener('click',()=>{
+    const amt=Number($('payAmt').value)||0;if(amt<=0){toast('Nominal belum diisi');return}
+    curPay.payments=curPay.payments||[];curPay.payments.push({tgl:$('payDate').value,jenis:$('payType').value,nominal:amt});
+    $('payAmt').value='';persistPay();renderPay();renderTable();toast('Pembayaran dicatat');
   });
+  function persistPay(){const i=offers.findIndex(o=>o.id===curPay.id);if(i>=0)offers[i]=curPay;store.set('umroh_offers2',offers)}
+  $('payX').addEventListener('click',()=>$('payOverlay').classList.remove('open'));
+  $('payClose').addEventListener('click',()=>$('payOverlay').classList.remove('open'));
+  $('payNota').addEventListener('click',()=>{persistPay();showNotaPembayaran(curPay)});
+
+  // ================= NOTA =================
+  const BISM='بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ';
+  function idRow(k,v){return `<div class="r"><span class="k">${k}</span><span class="v">${esc(v)||'—'}</span></div>`}
+  function showNotaPenawaran(o){
+    const inc=(o.inc||[]).map(x=>`<li>${esc(x)}</li>`).join('')||'<li style="opacity:.5">—</li>';
+    const exc=(o.exc||[]).map(x=>`<li>${esc(x)}</li>`).join('')||'<li style="opacity:.5">—</li>';
+    $('notaContent').innerHTML=`
+      <div class="nota-top"><div class="bism">${BISM}</div><h3>Penawaran Biaya Umroh</h3><div class="co">Harga per jamaah (per pax)</div></div>
+      <div class="nota-body">
+        <div class="nota-id">
+          ${idRow('Nama Calon Jamaah',o.nama)}${idRow('Program',o.program)}${idRow('Jumlah',o.jumlah+' Pax')}
+          ${idRow('Asal Bandara',o.bandara)}${idRow('Rencana Berangkat',fmtRange(o.tglGo,o.tglBack))}
+          ${idRow('Hotel Makkah',o.hMakkah)}${idRow('Hotel Madinah',o.hMadinah)}${idRow('Hotel Jakarta',o.hJakarta)}${idRow('Pesawat',o.hPesawat)}
+        </div>
+        <div class="nota-sec-title">Harga Penawaran</div>
+        <div class="nota-prices">
+          <div class="np"><div class="h">Quad</div><div class="b">${rupiah(o.prices.quad)}<span class="pp">/ pax</span></div></div>
+          <div class="np"><div class="h">Triple</div><div class="b">${rupiah(o.prices.triple)}<span class="pp">/ pax</span></div></div>
+          <div class="np"><div class="h">Double</div><div class="b">${rupiah(o.prices.double)}<span class="pp">/ pax</span></div></div>
+        </div>
+        <div class="nota-cols">
+          <div><h4>Harga Termasuk</h4><ul class="inc">${inc}</ul></div>
+          <div><h4>Harga Belum Termasuk</h4><ul class="exc">${exc}</ul></div>
+        </div>
+      </div>
+      <div class="nota-foot">Harga sewaktu-waktu dapat berubah tanpa pemberitahuan terlebih dahulu.</div>`;
+    $('notaView').classList.add('open');
+  }
+  function showNotaPembayaran(o){
+    const room=o.payRoom||'quad';const perPax=o.prices[room];const tot=perPax*(o.jumlah||1);
+    const paid=paidOf(o);const sisa=Math.max(0,tot-paid);const lunas=tot>0&&paid>=tot;
+    const rows=(o.payments||[]).map(p=>`<tr><td>${fmtDate(p.tgl)}</td><td>${esc(p.jenis)}</td><td class="r">${rupiah(p.nominal)}</td></tr>`).join('')||'<tr><td colspan="3" style="opacity:.5">Belum ada pembayaran</td></tr>';
+    $('notaContent').innerHTML=`
+      <div class="nota-top"><div class="bism">${BISM}</div><h3>Nota Pembayaran Umroh</h3><div class="co">${lunas?'LUNAS':'Bukti Pembayaran'}</div></div>
+      <div class="nota-body">
+        <div class="nota-id">
+          ${idRow('Nama Calon Jamaah',o.nama)}${idRow('Program',o.program)}${idRow('Jumlah',o.jumlah+' Pax')}
+          ${idRow('Tipe Kamar',room.charAt(0).toUpperCase()+room.slice(1))}${idRow('Rencana Berangkat',fmtRange(o.tglGo,o.tglBack))}
+        </div>
+        <div class="nota-sec-title">Rincian Pembayaran</div>
+        <table class="pay-table"><thead><tr><th>Tanggal</th><th>Jenis</th><th class="r">Nominal</th></tr></thead><tbody>${rows}</tbody></table>
+        <div class="pay-summary">
+          <div class="ps"><div class="k">Total Tagihan</div><div class="v">${rupiah(tot)}</div></div>
+          <div class="ps paid"><div class="k">Sudah Dibayar</div><div class="v">${rupiah(paid)}</div></div>
+          <div class="ps due"><div class="k">Sisa</div><div class="v">${rupiah(sisa)}</div></div>
+        </div>
+      </div>
+      <div class="nota-foot">${perPax?rupiah(perPax)+' / pax × '+o.jumlah+' pax':''} · Simpan nota ini sebagai bukti pembayaran.</div>`;
+    $('notaView').classList.add('open');
+  }
+  $('notaClose').addEventListener('click',()=>$('notaView').classList.remove('open'));
 
   // ================= EXPORT / IMPORT =================
-  $('btnJson').addEventListener('click',()=>{
-    download('penawaran-umroh-backup.json', JSON.stringify({settings,offers},null,2));
-  });
+  $('btnJson').addEventListener('click',()=>download('backup-umroh.json',JSON.stringify({settings:S,offers},null,2)));
   $('btnCsv').addEventListener('click',()=>{
-    if(!offers.length){ toast('Belum ada data untuk diexport'); return; }
-    const head=['Nama','Program','Kelas','No HP','Tanggal Berangkat','Harga','Termasuk','Tidak Termasuk'];
-    const rows=offers.map(o=>[o.nama,o.program,o.kelas,o.hp,o.tgl,o.harga,(o.inc||[]).join('; '),(o.exc||[]).join('; ')]
-      .map(c=>`"${String(c==null?'':c).replace(/"/g,'""')}"`).join(','));
-    download('rekap-penawaran-umroh.csv', head.join(',')+'\n'+rows.join('\n'));
+    if(!offers.length){toast('Belum ada data');return}
+    const head=['Nama','Program','Pax','Berangkat','Quad','Triple','Double','Terbayar','Sisa','Status'];
+    const rows=offers.map(o=>{const p=paidOf(o),t=totalOf(o);return[o.nama,o.program,o.jumlah,o.tglGo,o.prices.quad,o.prices.triple,o.prices.double,p,Math.max(0,t-p),statusOf(o)].map(c=>`"${String(c==null?'':c).replace(/"/g,'""')}"`).join(',')});
+    download('rekap-umroh.csv',head.join(',')+'\n'+rows.join('\n'));
   });
   $('btnImport').addEventListener('click',()=>$('fileImport').click());
-  $('fileImport').addEventListener('change',e=>{
-    const f=e.target.files[0]; if(!f) return;
-    const r=new FileReader();
-    r.onload=()=>{ try{
-      const d=JSON.parse(r.result);
-      if(d.settings) settings=d.settings;
-      if(Array.isArray(d.offers)) offers=d.offers;
-      store.set('umroh_settings',settings); persistOffers();
-      fillSettingsForm(); renderTable(); toast('Data berhasil diimpor');
-    }catch(err){ toast('File tidak valid'); } };
-    r.readAsText(f); e.target.value='';
-  });
-  function download(name,content){
-    const blob=new Blob([content],{type:'text/plain;charset=utf-8'});
-    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; a.click();
-    setTimeout(()=>URL.revokeObjectURL(a.href),1000);
-  }
+  $('fileImport').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
+    r.onload=()=>{try{const d=JSON.parse(r.result);if(d.settings)S=d.settings;if(Array.isArray(d.offers))offers=d.offers;store.set('umroh_settings2',S);store.set('umroh_offers2',offers);fillSettings();renderTable();toast('Data diimpor')}catch(err){toast('File tidak valid')}};
+    r.readAsText(f);e.target.value=''});
+  function download(name,content){const blob=new Blob([content],{type:'text/plain;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 
-  // ---------- init ----------
-  fillSettingsForm();
-  renderTable();
+  // ================= INIT =================
+  fillSettings();renderTable();
 </script>
 </body>
 </html>
