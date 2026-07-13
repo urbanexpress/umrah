@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uberpaket Cashless Recorder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Pustaka Grafik -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .tab-active { color: #2563eb; background-color: #eff6ff; }
+        .loader { border-top-color: #2563eb; animation: spinner 1.5s linear infinite; }
+        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .modal-enter { animation: modal-bg-fade 0.3s ease-out; }
+        .modal-content-enter { animation: modal-content-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        @keyframes modal-bg-fade { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes modal-content-pop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    </style>
+</head>
+<body class="bg-[#F8FAFC] min-h-screen">
+
+    <nav class="bg-white border-b border-gray-100 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-2">
+                    <div class="bg-blue-600 p-2 rounded-lg text-white">
+                        <i data-lucide="package" class="w-6 h-6"></i>
+                    </div>
+                    <span class="text-xl font-bold text-gray-800">Uberpaket<span class="text-blue-600">Cashless</span></span>
+                </div>
+                <div id="nav-actions"></div>
+            </div>
+        </div>
+    </nav>
+
+    <main id="app-content" class="pb-20"></main>
+
+    <footer class="py-12 border-t border-gray-100 text-center text-gray-400 text-xs">
+        <p>© 2024 Uberpaket Cashless Rekap System • Powered by Supabase</p>
+    </footer>
+
+    <!-- Overlay Loader -->
+    <div id="global-loader" class="fixed inset-0 bg-white/80 z-[100] flex flex-col items-center justify-center hidden">
+        <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12 mb-4"></div>
+        <p class="text-blue-600 font-bold" id="loader-text">Memproses...</p>
+    </div>
+
+    <!-- Modal Pesan/Alert Kustom -->
+    <div id="msg-modal" class="fixed inset-0 bg-black/50 z-[120] flex items-center justify-center hidden modal-enter">
+        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-xs text-center border modal-content-enter">
+            <div id="msg-icon-area" class="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4"></div>
+            <h3 id="msg-title" class="font-bold text-gray-800 mb-2">Pesan</h3>
+            <p id="msg-text" class="text-sm text-gray-500 mb-6"></p>
+            <button onclick="closeMsgModal()" class="w-full py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-bold transition-colors">Tutup</button>
+        </div>
+    </div>
+
+    <!-- Modal PIN Owner -->
+    <div id="pin-modal" class="fixed inset-0 bg-black/50 z-[110] flex items-center justify-center hidden modal-enter">
+        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-xs text-center border modal-content-enter">
+            <i data-lucide="key-round" class="text-amber-600 w-10 h-10 mx-auto mb-4"></i>
+            <h3 class="font-bold text-gray-800 mb-2">PIN Owner Dibutuhkan</h3>
+            <input type="password" id="pin-input" maxlength="6" placeholder="••••••" class="w-full text-center text-2xl font-bold p-3 border rounded-xl mb-4 bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none">
+            <div class="flex gap-2">
+                <button onclick="togglePinModal(false)" class="flex-1 py-2 text-gray-500 font-bold">Batal</button>
+                <button onclick="verifyOwnerPin()" class="flex-1 py-2 bg-blue-600 text-white rounded-xl font-bold">Buka</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Konfirmasi Hapus -->
+    <div id="confirm-modal" class="fixed inset-0 bg-black/50 z-[110] flex items-center justify-center hidden modal-enter">
+        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm text-center border modal-content-enter">
+            <div class="bg-red-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i data-lucide="trash-2" class="text-red-600 w-8 h-8"></i>
+            </div>
+            <h3 id="confirm-title" class="font-black text-gray-900 text-xl mb-2">Konfirmasi Hapus</h3>
+            <p id="confirm-text" class="text-sm text-gray-500 mb-8 px-4"></p>
+            <div class="flex gap-3">
+                <button onclick="toggleConfirmModal(false)" class="flex-1 py-3 text-gray-500 font-bold hover:bg-gray-50 rounded-xl transition-colors">Batal</button>
+                <button id="confirm-execute-btn" class="flex-1 py-3 bg-red-600 text-white rounded-xl font-bold shadow-lg shadow-red-100 hover:bg-red-700 transition-all">Ya, Hapus</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Reset Data -->
+    <div id="reset-modal" class="fixed inset-0 bg-black/50 z-[110] flex items-center justify-center hidden modal-enter">
+        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm text-center border modal-content-enter">
+            <div class="bg-red-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i data-lucide="alert-triangle" class="text-red-600 w-8 h-8"></i>
+            </div>
+            <h3 class="font-black text-gray-900 text-xl mb-2">Hapus Seluruh Data?</h3>
+            <p class="text-sm text-gray-500 mb-6 text-center leading-relaxed">Tindakan ini akan menghapus <b>seluruh rekaman pengiriman</b> di bank data secara permanen. Ketik <span class="text-red-600 font-black">reset</span> di bawah untuk melanjutkan.</p>
+            <input type="text" id="reset-confirm-input" placeholder="Ketik 'reset' di sini" class="w-full text-center p-4 border-2 border-gray-100 rounded-2xl mb-6 focus:border-red-500 outline-none font-bold">
+            <div class="flex gap-3">
+                <button onclick="toggleResetModal(false)" class="flex-1 py-3 text-gray-500 font-bold hover:bg-gray-50 rounded-xl transition-colors">Batal</button>
+                <button onclick="executeFullReset()" class="flex-1 py-3 bg-red-600 text-white rounded-xl font-bold shadow-lg shadow-red-100 hover:bg-red-700 transition-all">Hapus Semua</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = "https://cdvpmtnjkqjzruffsoyz.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNkdnBtdG5qa3FqenJ1ZmZzb3l6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkzNDI1MDYsImV4cCI6MjA4NDkxODUwNn0.tDa9YhKMpV7wzBiOjdjgHiWii59UTZHW2Chb9O6JKwU";
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let state = {
+            view: 'login',
+            user: null,
+            shipments: [],
+            settings: [],
+            showCommission: false,
+            dateRange: {
+                start: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0],
+                end: new Date().toISOString().split('T')[0]
+            },
+            inputRows: [{ expedition: '', count: '' }],
+            charts: { line: null, pie: null }
+        };
+
+        const OWNER_PIN = "131313";
+
+        window.addEventListener('load', async () => {
+            lucide.createIcons();
+            await checkAuth();
+            await loadData();
+            showView(state.user ? 'dashboard' : 'login');
+        });
+
+        async function checkAuth() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            state.user = session?.user || null;
+            updateNavbar();
+        }
+
+        async function loadData() {
+            const { data: shipData } = await supabaseClient.from('shipments').select('*').order('tanggal', { ascending: false });
+            const { data: settingsData } = await supabaseClient.from('settings').select('*');
+            if (shipData) state.shipments = shipData;
+            if (settingsData) state.settings = settingsData;
+            
+            if (state.view === 'dashboard') renderDashboard();
+            if (state.view === 'settings') renderSettings();
+            if (state.view === 'analytics') renderAnalytics();
+        }
+
+        function showView(viewName) {
+            state.view = viewName;
+            const content = document.getElementById('app-content');
+            updateNavbar();
+
+            if (viewName === 'login') {
+                content.innerHTML = renderLogin();
+            } else if (viewName === 'dashboard') {
+                renderDashboard();
+            } else if (viewName === 'settings') {
+                renderSettings();
+            } else if (viewName === 'analytics') {
+                renderAnalytics();
+            }
+            lucide.createIcons();
+        }
+
+        function updateNavbar() {
+            const nav = document.getElementById('nav-actions');
+            if (!state.user) {
+                nav.innerHTML = '';
+            } else {
+                nav.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <button onclick="showView('dashboard')" title="Dashboard" class="p-2 rounded-lg ${state.view === 'dashboard' ? 'tab-active' : 'text-gray-500 hover:bg-gray-50'}"><i data-lucide="layout-dashboard"></i></button>
+                        <button onclick="showView('analytics')" title="Analisa Statistik" class="p-2 rounded-lg ${state.view === 'analytics' ? 'tab-active' : 'text-gray-500 hover:bg-gray-50'}"><i data-lucide="bar-chart-3"></i></button>
+                        <button onclick="showView('settings')" title="Pengaturan" class="p-2 rounded-lg ${state.view === 'settings' ? 'tab-active' : 'text-gray-500 hover:bg-gray-50'}"><i data-lucide="settings"></i></button>
+                        <button onclick="handleLogout()" title="Keluar" class="p-2 text-red-500 hover:bg-red-50 rounded-lg"><i data-lucide="log-out"></i></button>
+                    </div>
+                `;
+            }
+            lucide.createIcons();
+        }
+
+        function renderLogin() {
+            return `
+                <div class="max-w-md mx-auto px-4 py-20 text-center">
+                    <div class="bg-white p-10 rounded-[2.5rem] shadow-2xl border border-gray-100">
+                        <div class="bg-blue-600 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-200">
+                            <i data-lucide="shield-check" class="text-white w-8 h-8"></i>
+                        </div>
+                        <h2 class="text-3xl font-bold text-gray-900 mb-8">Admin Login</h2>
+                        <input type="email" id="login-email" placeholder="Email" class="w-full p-4 border rounded-2xl mb-4 focus:ring-2 focus:ring-blue-500 outline-none">
+                        <input type="password" id="login-password" placeholder="Password" class="w-full p-4 border rounded-2xl mb-6 focus:ring-2 focus:ring-blue-500 outline-none">
+                        <button onclick="handleLogin()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold shadow-xl shadow-blue-100 transition-all active:scale-95">Masuk Dashboard</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderDashboard() {
+            const filtered = state.shipments.filter(s => s.tanggal >= state.dateRange.start && s.tanggal <= state.dateRange.end);
+            const totalShipments = filtered.reduce((acc, curr) => acc + (Number(curr.poin) || 0), 0);
+            const totalCommission = filtered.reduce((acc, curr) => acc + (Number(curr.komisi) || 0), 0);
+
+            const content = document.getElementById('app-content');
+            content.innerHTML = `
+                <div class="max-w-7xl mx-auto px-4 py-8 space-y-8 animate-in fade-in duration-500">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Dashboard Admin</h1>
+                        <div class="bg-white p-2 rounded-2xl border shadow-sm flex items-center gap-2">
+                             <input type="date" id="input-date" value="${new Date().toISOString().split('T')[0]}" class="px-4 py-2 bg-gray-50 rounded-xl font-bold text-gray-700 outline-none">
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-black text-gray-800 text-lg flex items-center gap-2"><i data-lucide="plus-circle" class="text-blue-600"></i> Input Data Pengiriman</h3>
+                            <button onclick="addInputRow()" class="text-blue-600 font-bold flex items-center gap-1 text-sm hover:underline"><i data-lucide="plus" class="w-4 h-4"></i> Tambah Baris</button>
+                        </div>
+                        <div class="overflow-x-auto mb-6">
+                            <table class="w-full text-left border-collapse">
+                                <thead class="text-[10px] font-black uppercase text-gray-400 tracking-widest border-b">
+                                    <tr>
+                                        <th class="py-3 px-2">Nama Ekspedisi</th>
+                                        <th class="py-3 px-2">Jumlah Paket</th>
+                                        <th class="py-3 px-2 text-right">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="input-table-body" class="divide-y">
+                                    ${state.inputRows.map((row, index) => `
+                                        <tr>
+                                            <td class="py-4 px-2">
+                                                <select onchange="updateInputRow(${index}, 'expedition', this.value)" class="w-full p-3 bg-gray-50 rounded-xl border-none font-bold text-gray-700 focus:ring-2 focus:ring-blue-500 outline-none">
+                                                    <option value="">Pilih Ekspedisi...</option>
+                                                    ${state.settings.map(s => `<option value="${s.name}" ${row.expedition === s.name ? 'selected' : ''}>${s.name.toUpperCase()}</option>`).join('')}
+                                                </select>
+                                            </td>
+                                            <td class="py-4 px-2">
+                                                <input type="number" value="${row.count}" oninput="updateInputRow(${index}, 'count', this.value)" placeholder="0" class="w-full p-3 bg-gray-50 rounded-xl border-none font-bold text-gray-700 focus:ring-2 focus:ring-blue-500 outline-none">
+                                            </td>
+                                            <td class="py-4 px-2 text-right">
+                                                <button onclick="removeInputRow(${index})" class="p-2 text-red-400 hover:text-red-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                        <button onclick="submitInputData()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black shadow-xl shadow-blue-100 hover:bg-blue-700 transition-all active:scale-[0.99]">Simpan ke Bank Data</button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100 flex items-center justify-between overflow-hidden relative">
+                            <div class="flex items-center gap-6 relative z-10">
+                                <div class="bg-green-100 p-5 rounded-3xl text-green-600 transition-transform relative"><i data-lucide="banknote" class="w-10 h-10"></i></div>
+                                <div>
+                                    <p class="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-1">Total Komisi</p>
+                                    <p class="text-4xl font-black ${state.showCommission ? 'text-gray-900' : 'text-gray-200'}">
+                                        ${state.showCommission ? 'Rp ' + totalCommission.toLocaleString('id-ID') : 'Rp ••••••••'}
+                                    </p>
+                                </div>
+                            </div>
+                            <button onclick="${state.showCommission ? 'toggleCommission(false)' : 'togglePinModal(true)'}" class="p-4 rounded-2xl bg-gray-50 text-gray-400 z-10 hover:bg-gray-100 transition-colors">
+                                <i data-lucide="${state.showCommission ? 'eye-off' : 'lock'}"></i>
+                            </button>
+                            <div class="absolute top-0 right-0 -mr-10 -mt-10 w-40 h-40 bg-green-50 rounded-full opacity-30"></div>
+                        </div>
+                        
+                        <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100 flex items-center gap-6 overflow-hidden relative group">
+                            <div class="bg-blue-100 p-5 rounded-3xl text-blue-600 transition-transform relative z-10"><i data-lucide="package" class="w-10 h-10"></i></div>
+                            <div class="relative z-10">
+                                <p class="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-1">Total Kiriman</p>
+                                <p class="text-4xl font-black text-gray-900">${totalShipments.toLocaleString('id-ID')} <span class="text-lg font-bold text-gray-300">Paket</span></p>
+                            </div>
+                            <div class="absolute top-0 right-0 -mr-10 -mt-10 w-40 h-40 bg-blue-50 rounded-full opacity-30"></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 overflow-hidden">
+                        <div class="p-8 border-b border-gray-50 flex flex-col md:flex-row justify-between items-center bg-gray-50/20 gap-4">
+                            <h3 class="font-black text-gray-900 text-xl text-center md:text-left">Bank Data Rekapitulasi</h3>
+                            <div class="flex items-center gap-4 bg-white p-2 rounded-2xl border shadow-sm">
+                                <input type="date" value="${state.dateRange.start}" onchange="updateDateRange('start', this.value)" class="bg-transparent px-2 font-bold text-xs text-gray-600 outline-none">
+                                <span class="text-gray-300 font-bold">s/d</span>
+                                <input type="date" value="${state.dateRange.end}" onchange="updateDateRange('end', this.value)" class="bg-transparent px-2 font-bold text-xs text-gray-600 outline-none">
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-gray-50/50 text-gray-400 font-black uppercase text-[10px] tracking-[0.2em] border-b">
+                                    <tr>
+                                        <th class="px-8 py-5">Tanggal</th>
+                                        <th class="px-8 py-5">Ekspedisi</th>
+                                        <th class="px-8 py-5 text-right">Jumlah</th>
+                                        <th class="px-8 py-5 text-right">Komisi</th>
+                                        <th class="px-8 py-5 text-right">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-50">
+                                    ${filtered.map(item => `
+                                        <tr class="hover:bg-blue-50/20 transition-colors group">
+                                            <td class="px-8 py-5 text-gray-500 font-bold">${new Date(item.tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
+                                            <td class="px-8 py-5 font-black uppercase text-[11px] tracking-wide text-gray-700">${item.nama_ekspedisi}</td>
+                                            <td class="px-8 py-5 text-right"><span class="bg-blue-600 text-white px-3 py-1 rounded-full font-black text-[10px]">${item.poin} Pkt</span></td>
+                                            <td class="px-8 py-5 text-right font-black ${state.showCommission ? 'text-green-600' : 'text-gray-200 tracking-tighter'}">${state.showCommission ? 'Rp ' + Number(item.komisi).toLocaleString('id-ID') : '••••••'}</td>
+                                            <td class="px-8 py-5 text-right">
+                                                <button onclick="confirmDeleteEntry('${item.id}')" class="p-2 text-red-300 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-all"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                            </td>
+                                        </tr>
+                                    `).join('') || '<tr><td colspan="5" class="p-20 text-center text-gray-400 font-medium italic">Belum ada data rekaman</td></tr>'}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+        // --- View Analisa Statistik ---
+        function renderAnalytics() {
+            const filtered = state.shipments.filter(s => s.tanggal >= state.dateRange.start && s.tanggal <= state.dateRange.end);
+            
+            const content = document.getElementById('app-content');
+            content.innerHTML = `
+                <div class="max-w-7xl mx-auto px-4 py-8 space-y-8 animate-in fade-in duration-500">
+                    <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                        <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Analisa Statistik</h1>
+                        <div class="flex items-center gap-4 bg-white p-2 rounded-2xl border shadow-sm">
+                            <input type="date" value="${state.dateRange.start}" onchange="updateDateRange('start', this.value)" class="bg-transparent px-2 font-bold text-xs text-gray-600 outline-none">
+                            <span class="text-gray-300 font-bold">s/d</span>
+                            <input type="date" value="${state.dateRange.end}" onchange="updateDateRange('end', this.value)" class="bg-transparent px-2 font-bold text-xs text-gray-600 outline-none">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div class="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
+                            <h3 class="font-black text-gray-800 text-lg mb-6 flex items-center gap-2"><i data-lucide="trending-up" class="text-blue-600"></i> Tren Pengiriman Harian</h3>
+                            <div class="h-64 relative">
+                                <canvas id="growthChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
+                            <h3 class="font-black text-gray-800 text-lg mb-6 flex items-center gap-2"><i data-lucide="pie-chart" class="text-purple-600"></i> Distribusi Ekspedisi</h3>
+                            <div class="h-64 relative">
+                                <canvas id="distChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Laporan Analisa Kenaikan/Penurunan (Baru) -->
+                    <div class="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
+                        <h3 class="font-black text-gray-800 text-lg mb-6 flex items-center gap-2"><i data-lucide="trending-up" class="text-blue-600"></i> Analisa Perubahan Volume Per Ekspedisi</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-gray-50/50 text-gray-400 font-black uppercase text-[10px] tracking-widest border-b">
+                                    <tr>
+                                        <th class="px-6 py-4">Ekspedisi</th>
+                                        <th class="px-6 py-4 text-center">Periode Awal</th>
+                                        <th class="px-6 py-4 text-center">Periode Akhir</th>
+                                        <th class="px-6 py-4 text-center">Perubahan</th>
+                                        <th class="px-6 py-4 text-right">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="growth-table-body" class="divide-y divide-gray-50">
+                                    <!-- Diisi oleh JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="analysis-insights" class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+                            <!-- Ringkasan analisa -->
+                        </div>
+                    </div>
+                </div>
+            `;
+            lucide.createIcons();
+            initAnalyticsCharts(filtered);
+        }
+
+        function initAnalyticsCharts(data) {
+            // Urutkan data berdasarkan tanggal
+            const sortedData = [...data].sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
+            
+            // 1. Logika Grafik Garis (Tren Harian)
+            const dateGroups = {};
+            sortedData.forEach(s => {
+                dateGroups[s.tanggal] = (dateGroups[s.tanggal] || 0) + Number(s.poin);
+            });
+            const sortedDates = Object.keys(dateGroups).sort();
+            const dateLabels = sortedDates.map(d => new Date(d).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' }));
+            const dateValues = sortedDates.map(d => dateGroups[d]);
+
+            // 2. Logika Grafik Pie (Distribusi)
+            const expGroups = {};
+            data.forEach(s => {
+                expGroups[s.nama_ekspedisi] = (expGroups[s.nama_ekspedisi] || 0) + Number(s.poin);
+            });
+            const expLabels = Object.keys(expGroups);
+            const expValues = Object.values(expGroups);
+
+            // 3. Analisa Kenaikan/Penurunan per Ekspedisi
+            // Bagi data menjadi 2 bagian waktu (awal dan akhir periode)
+            const uniqueDates = sortedDates;
+            const midIndex = Math.ceil(uniqueDates.length / 2);
+            const firstHalfDates = uniqueDates.slice(0, midIndex);
+            const secondHalfDates = uniqueDates.slice(midIndex);
+
+            const growthTableBody = document.getElementById('growth-table-body');
+            const allExpeditions = state.settings.map(s => s.name);
+            let growthRowsHtml = '';
+
+            allExpeditions.forEach(expName => {
+                const totalFirst = sortedData
+                    .filter(s => s.nama_ekspedisi === expName && firstHalfDates.includes(s.tanggal))
+                    .reduce((acc, curr) => acc + Number(curr.poin), 0);
+                
+                const totalSecond = sortedData
+                    .filter(s => s.nama_ekspedisi === expName && secondHalfDates.includes(s.tanggal))
+                    .reduce((acc, curr) => acc + Number(curr.poin), 0);
+
+                const diff = totalSecond - totalFirst;
+                const percent = totalFirst > 0 ? ((diff / totalFirst) * 100).toFixed(1) : (totalSecond > 0 ? "100" : "0");
+                const isGrowth = diff > 0;
+                const isDown = diff < 0;
+
+                growthRowsHtml += `
+                    <tr>
+                        <td class="px-6 py-5 font-black uppercase text-gray-700 tracking-wide text-[11px]">${expName}</td>
+                        <td class="px-6 py-5 text-center font-bold text-gray-500">${totalFirst}</td>
+                        <td class="px-6 py-5 text-center font-bold text-gray-900">${totalSecond}</td>
+                        <td class="px-6 py-5 text-center">
+                            <span class="font-black ${diff >= 0 ? 'text-green-600' : 'text-red-600'} text-xs">
+                                ${diff > 0 ? '+' : ''}${diff} (${percent}%)
+                            </span>
+                        </td>
+                        <td class="px-6 py-5 text-right">
+                            ${isGrowth ? 
+                                '<span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-[10px] font-black uppercase flex items-center justify-end gap-1"><i data-lucide="trending-up" class="w-3 h-3"></i> Naik</span>' : 
+                                (isDown ? 
+                                '<span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-[10px] font-black uppercase flex items-center justify-end gap-1"><i data-lucide="trending-down" class="w-3 h-3"></i> Turun</span>' : 
+                                '<span class="bg-gray-100 text-gray-500 px-3 py-1 rounded-full text-[10px] font-black uppercase flex items-center justify-end gap-1">Stabil</span>')}
+                        </td>
+                    </tr>
+                `;
+            });
+            growthTableBody.innerHTML = growthRowsHtml || '<tr><td colspan="5" class="p-10 text-center text-gray-400 italic font-medium">Lengkapi setidaknya 2 hari data untuk melihat analisa tren</td></tr>';
+
+            // 4. Laporan Insight
+            const totalPackets = data.reduce((a, b) => a + Number(b.poin), 0);
+            const topExp = expLabels.length > 0 ? expLabels.reduce((a, b) => expGroups[a] > expGroups[b] ? a : b) : "-";
+            const avgDaily = dateLabels.length > 0 ? (totalPackets / dateLabels.length).toFixed(1) : 0;
+
+            const insightsArea = document.getElementById('analysis-insights');
+            insightsArea.innerHTML = `
+                <div class="p-6 bg-blue-50 rounded-[2rem] border border-blue-100">
+                    <p class="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-2">Market Leader</p>
+                    <p class="text-sm text-gray-700 leading-relaxed font-semibold">Ekspedisi <b class="text-blue-600 uppercase underline decoration-2">${topExp}</b> memimpin pengiriman dengan volume <b class="text-blue-600">${expGroups[topExp] || 0} paket</b>.</p>
+                </div>
+                <div class="p-6 bg-indigo-50 rounded-[2rem] border border-indigo-100">
+                    <p class="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-2">Volume Harian</p>
+                    <p class="text-sm text-gray-700 leading-relaxed font-semibold">Tercatat rata-rata pengiriman sebanyak <b class="text-indigo-600">${avgDaily} paket per hari</b> dalam rentang waktu terpilih.</p>
+                </div>
+                <div class="p-6 bg-purple-50 rounded-[2rem] border border-purple-100">
+                    <p class="text-[10px] font-black text-purple-400 uppercase tracking-widest mb-2">Efisiensi</p>
+                    <p class="text-sm text-gray-700 leading-relaxed font-semibold">Terdapat <b class="text-purple-600">${expLabels.length} ekspedisi aktif</b> yang melayani operasional Uberpaket pada periode ini.</p>
+                </div>
+            `;
+
+            // Setup Charts
+            if (state.charts.line) state.charts.line.destroy();
+            if (state.charts.pie) state.charts.pie.destroy();
+
+            const ctxLine = document.getElementById('growthChart').getContext('2d');
+            state.charts.line = new Chart(ctxLine, {
+                type: 'line',
+                data: {
+                    labels: dateLabels,
+                    datasets: [{
+                        label: 'Paket',
+                        data: dateValues,
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 3,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#fff'
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+            });
+
+            const ctxPie = document.getElementById('distChart').getContext('2d');
+            state.charts.pie = new Chart(ctxPie, {
+                type: 'doughnut',
+                data: {
+                    labels: expLabels.map(l => l.toUpperCase()),
+                    datasets: [{
+                        data: expValues,
+                        backgroundColor: ['#2563eb', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#6366f1'],
+                        borderWidth: 0
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20, font: { weight: 'bold', size: 10 } } } }, cutout: '70%' }
+            });
+            
+            lucide.createIcons();
+        }
+
+        function renderSettings() {
+            const content = document.getElementById('app-content');
+            content.innerHTML = `
+                <div class="max-w-4xl mx-auto px-4 py-8 space-y-8 animate-in fade-in duration-500">
+                    <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Pengaturan Komisi</h1>
+                    <div class="grid lg:grid-cols-3 gap-8">
+                        <div class="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm h-fit">
+                            <h3 class="font-black text-gray-800 mb-6 tracking-tight text-center md:text-left">Tambah Ekspedisi</h3>
+                            <input id="set-name" placeholder="Nama Ekspedisi" class="w-full p-4 border rounded-2xl bg-gray-50 mb-4 font-bold outline-none focus:ring-2 focus:ring-blue-500">
+                            <input id="set-rate" type="number" placeholder="Komisi/Paket" class="w-full p-4 border rounded-2xl bg-gray-50 mb-6 font-bold outline-none focus:ring-2 focus:ring-blue-500">
+                            <button onclick="addExpedition()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-blue-100 hover:bg-blue-700 transition-all active:scale-95">Simpan</button>
+                        </div>
+                        <div class="lg:col-span-2 bg-white rounded-[2.5rem] border border-gray-100 overflow-hidden shadow-sm">
+                            <table class="w-full text-left">
+                                <thead class="bg-gray-50/50 text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] border-b">
+                                    <tr><th class="px-8 py-5">Ekspedisi</th><th class="px-8 py-5 text-right">Tarif</th><th class="px-8 py-5 text-right">Aksi</th></tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-50">
+                                    ${state.settings.map(c => `
+                                        <tr>
+                                            <td class="px-8 py-5 font-black uppercase text-gray-700 tracking-wide">${c.name}</td>
+                                            <td class="px-8 py-5 text-right text-green-600 font-black">Rp ${Number(c.rate).toLocaleString('id-ID')}</td>
+                                            <td class="px-8 py-5 text-right">
+                                                <button onclick="confirmDeleteSetting('${c.id}', '${c.name}')" class="p-2 text-red-300 hover:text-red-600 transition-colors">
+                                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    `).join('') || '<tr><td colspan="3" class="p-10 text-center text-gray-400 italic">Belum ada daftar ekspedisi</td></tr>'}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="bg-red-50 p-8 rounded-[2.5rem] border-2 border-red-100 shadow-sm mt-12">
+                        <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                            <div class="text-center md:text-left">
+                                <h3 class="text-red-800 font-black text-xl mb-1">Zona Bahaya</h3>
+                                <p class="text-red-600 text-sm font-medium">Hapus seluruh data bank data secara permanen</p>
+                            </div>
+                            <button onclick="toggleResetModal(true)" class="px-10 py-4 bg-red-600 text-white rounded-2xl font-black shadow-xl shadow-red-100 hover:bg-red-700 transition-all active:scale-95">Kosongkan Bank Data</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+        // --- Fitur Modal & Handler (Sama seperti sebelumnya) ---
+        function toggleConfirmModal(show, title = "", text = "", onConfirm = null) {
+            const modal = document.getElementById('confirm-modal');
+            if (show) {
+                document.getElementById('confirm-title').innerText = title;
+                document.getElementById('confirm-text').innerText = text;
+                const btn = document.getElementById('confirm-execute-btn');
+                btn.onclick = async () => { if (onConfirm) await onConfirm(); toggleConfirmModal(false); };
+                modal.classList.remove('hidden');
+            } else modal.classList.add('hidden');
+            lucide.createIcons();
+        }
+        function showMessage(title, text, type = 'info') {
+            const modal = document.getElementById('msg-modal');
+            document.getElementById('msg-title').innerText = title;
+            document.getElementById('msg-text').innerText = text;
+            const area = document.getElementById('msg-icon-area');
+            area.className = "w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 " + (type === 'error' ? "bg-red-100 text-red-600" : "bg-blue-100 text-blue-600");
+            area.innerHTML = `<i data-lucide="${type === 'error' ? 'alert-circle' : 'info'}"></i>`;
+            modal.classList.remove('hidden');
+            lucide.createIcons();
+        }
+        function closeMsgModal() { document.getElementById('msg-modal').classList.add('hidden'); }
+        function confirmDeleteSetting(id, name) { toggleConfirmModal(true, "Hapus Ekspedisi?", `Hapus "${name.toUpperCase()}" dari daftar?`, async () => { toggleLoader(true, "Menghapus..."); const { error } = await supabaseClient.from('settings').delete().eq('id', id); toggleLoader(false); if (error) showMessage("Gagal", error.message, "error"); else await loadData(); }); }
+        function confirmDeleteEntry(id) { toggleConfirmModal(true, "Hapus Rekaman?", "Tindakan ini akan menghapus rekaman data ini secara permanen.", async () => { toggleLoader(true, "Menghapus..."); const { error } = await supabaseClient.from('shipments').delete().eq('id', id); toggleLoader(false); if (error) showMessage("Gagal", error.message, "error"); else await loadData(); }); }
+        function addInputRow() { state.inputRows.push({ expedition: '', count: '' }); renderDashboard(); }
+        function removeInputRow(index) { if (state.inputRows.length > 1) { state.inputRows.splice(index, 1); renderDashboard(); } }
+        function updateInputRow(index, field, value) { state.inputRows[index][field] = value; }
+        async function submitInputData() {
+            const date = document.getElementById('input-date').value;
+            const validData = state.inputRows.filter(r => r.expedition && r.count > 0);
+            if (validData.length === 0) return showMessage("Peringatan", "Harap isi setidaknya satu baris data yang valid.");
+            toggleLoader(true, "Menyimpan data...");
+            const toInsert = validData.map(row => {
+                const rate = state.settings.find(s => s.name === row.expedition)?.rate || 0;
+                return { nama_ekspedisi: row.expedition, poin: parseInt(row.count), komisi: Number(rate) * parseInt(row.count), tanggal: date, nama_pengirim: "-", no_resi: `INPUT-${Date.now()}` };
+            });
+            const { error } = await supabaseClient.from('shipments').insert(toInsert);
+            toggleLoader(false);
+            if (error) showMessage("Kesalahan", error.message, "error");
+            else { state.inputRows = [{ expedition: '', count: '' }]; await loadData(); showMessage("Berhasil", "Data telah disimpan."); }
+        }
+        function toggleResetModal(show) { const modal = document.getElementById('reset-modal'); modal.classList.toggle('hidden', !show); if (show) { document.getElementById('reset-confirm-input').value = ''; document.getElementById('reset-confirm-input').focus(); } lucide.createIcons(); }
+        async function executeFullReset() {
+            const input = document.getElementById('reset-confirm-input').value.trim().toLowerCase();
+            if (input !== 'reset') return showMessage("Gagal", "Ketik kata 'reset' untuk konfirmasi.");
+            toggleLoader(true, "Mereset data...");
+            const { error } = await supabaseClient.from('shipments').delete().filter('id', 'neq', '00000000-0000-0000-0000-000000000000');
+            toggleLoader(false);
+            if (error) showMessage("Kesalahan", error.message, "error");
+            else { toggleResetModal(false); await loadData(); showMessage("Berhasil", "Bank data dikosongkan."); }
+        }
+        async function handleLogin() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            if(!email || !password) return showMessage("Peringatan", "Isi email dan password.");
+            toggleLoader(true, "Autentikasi...");
+            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+            toggleLoader(false);
+            if (error) showMessage("Login Gagal", error.message, "error"); else { state.user = data.user; showView('dashboard'); }
+        }
+        async function handleLogout() { await supabaseClient.auth.signOut(); state.user = null; state.showCommission = false; showView('login'); }
+        function togglePinModal(show) { document.getElementById('pin-modal').classList.toggle('hidden', !show); if(show) document.getElementById('pin-input').focus(); }
+        function verifyOwnerPin() { if (document.getElementById('pin-input').value === OWNER_PIN) { state.showCommission = true; togglePinModal(false); showView(state.view); } else { showMessage("Gagal", "PIN salah.", "error"); document.getElementById('pin-input').value = ''; } }
+        function toggleCommission(show) { state.showCommission = show; showView(state.view); }
+        function updateDateRange(key, val) { state.dateRange[key] = val; showView(state.view); }
+        async function addExpedition() {
+            const name = document.getElementById('set-name').value.toLowerCase().trim();
+            const rate = document.getElementById('set-rate').value;
+            if(!name || !rate) return showMessage("Peringatan", "Harap isi semua kolom!");
+            toggleLoader(true, "Menyimpan...");
+            const { error } = await supabaseClient.from('settings').insert([{ name, rate: Number(rate) }]);
+            toggleLoader(false);
+            if(error) showMessage("Kesalahan", error.message, "error");
+            else { await loadData(); showMessage("Berhasil", `Ekspedisi ${name.toUpperCase()} ditambahkan.`); }
+        }
+        function toggleLoader(show, text = "") { document.getElementById('loader-text').innerText = text; document.getElementById('global-loader').classList.toggle('hidden', !show); }
+    </script>
+</body>
+</html>
