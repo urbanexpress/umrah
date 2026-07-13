@@ -1,639 +1,505 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Uberpaket Cashless Recorder</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Pustaka Grafik -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        .tab-active { color: #2563eb; background-color: #eff6ff; }
-        .loader { border-top-color: #2563eb; animation: spinner 1.5s linear infinite; }
-        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .modal-enter { animation: modal-bg-fade 0.3s ease-out; }
-        .modal-content-enter { animation: modal-content-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
-        @keyframes modal-bg-fade { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes modal-content-pop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Admin — Penawaran Umroh</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --emerald:#0b4d3f;--emerald-deep:#083a30;--gold:#b6862c;--gold-soft:#c9a94a;
+    --paper:#f5f2ea;--paper-2:#efe9dc;--ink:#1c2420;--ink-soft:#5a655d;
+    --line:#dfd8c8;--white:#fff;--danger:#a23b2d;--ok:#0b7a5a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--paper);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
+
+  /* ---- shell ---- */
+  .topbar{background:var(--emerald);color:#f3ecd8;padding:12px 22px;display:flex;align-items:center;gap:14px;border-bottom:3px solid var(--gold);position:sticky;top:0;z-index:20}
+  .topbar .kaaba{width:34px;height:34px;flex:none;display:grid;place-items:center;background:var(--emerald-deep);border:1px solid var(--gold);border-radius:6px;font-family:'Amiri',serif;color:var(--gold-soft);font-size:18px}
+  .topbar h1{font-size:15px;font-weight:700}
+  .topbar .sub{font-size:11px;color:#bcd3c9;font-weight:500}
+  .topbar .spacer{flex:1}
+  .btn{font-family:inherit;font-weight:700;cursor:pointer;border-radius:9px;border:none;letter-spacing:.3px;font-size:13px;padding:9px 15px;transition:background .15s,border-color .15s,color .15s}
+  .btn-gold{background:var(--gold);color:#3a2a08}
+  .btn-gold:hover{background:var(--gold-soft)}
+  .btn-emerald{background:var(--emerald);color:#f3ecd8}
+  .btn-emerald:hover{background:var(--emerald-deep)}
+  .btn-ghost{background:transparent;color:var(--ink-soft);border:1px solid var(--line)}
+  .btn-ghost:hover{border-color:var(--gold);color:var(--emerald)}
+  .btn-sm{font-size:12px;padding:6px 11px}
+  .btn-danger-ghost{background:transparent;color:var(--danger);border:1px solid #e8d5cf}
+  .btn-danger-ghost:hover{background:#f7ede9}
+
+  .tabs{display:flex;gap:2px;background:var(--paper-2);padding:0 22px;border-bottom:1px solid var(--line);position:sticky;top:59px;z-index:15}
+  .tab{font-family:inherit;font-size:13px;font-weight:700;color:var(--ink-soft);background:transparent;border:none;padding:13px 18px;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-1px}
+  .tab.active{color:var(--emerald);border-bottom-color:var(--gold)}
+  .tab:hover:not(.active){color:var(--ink)}
+
+  .wrap{max-width:1080px;margin:0 auto;padding:24px 22px 60px}
+  .view{display:none}.view.active{display:block}
+
+  /* ---- stat cards ---- */
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
+  .stat{background:var(--white);border:1px solid var(--line);border-radius:12px;padding:16px 18px;position:relative;overflow:hidden}
+  .stat::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--gold)}
+  .stat .lbl{font-size:11px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:var(--ink-soft)}
+  .stat .val{font-size:23px;font-weight:800;color:var(--emerald);margin-top:4px}
+  .stat .val small{font-size:13px;font-weight:600;color:var(--ink-soft)}
+
+  /* ---- toolbar ---- */
+  .toolbar{display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+  .search{flex:1;min-width:180px;position:relative}
+  .search input{width:100%;font-family:inherit;font-size:13.5px;padding:9px 11px 9px 34px;border:1px solid var(--line);border-radius:9px;background:var(--white)}
+  .search::before{content:"⌕";position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--ink-soft);font-size:16px}
+  .search input:focus,.card input:focus,.card select:focus,.card textarea:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(182,134,44,.15)}
+
+  /* ---- table ---- */
+  .tbl-card{background:var(--white);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  thead th{background:var(--emerald);color:#e8f0ec;text-align:left;padding:11px 14px;font-size:11px;letter-spacing:.6px;text-transform:uppercase;font-weight:700}
+  tbody td{padding:11px 14px;border-top:1px solid var(--line);vertical-align:middle}
+  tbody tr:hover{background:#faf7f0}
+  td.nama{font-weight:700;color:var(--emerald)}
+  td.harga{font-weight:700;white-space:nowrap}
+  td.act{white-space:nowrap;text-align:right}
+  td.act button{margin-left:5px}
+  .empty-state{padding:46px 20px;text-align:center;color:var(--ink-soft)}
+  .empty-state .big{font-family:'Amiri',serif;font-size:34px;color:var(--line);margin-bottom:8px}
+
+  /* ---- settings ---- */
+  .card{background:var(--white);border:1px solid var(--line);border-radius:12px;padding:20px 22px;margin-bottom:18px}
+  .card > h2{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--emerald);margin-bottom:14px;display:flex;align-items:center;gap:9px}
+  .card > h2 .no{font-family:'Amiri',serif;font-size:13px;width:24px;height:24px;border-radius:50%;background:var(--emerald);color:var(--gold-soft);display:grid;place-items:center;flex:none}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px 14px}
+  .field{display:flex;flex-direction:column;gap:5px}
+  .field.full{grid-column:1/-1}
+  label{font-size:11.5px;font-weight:600;color:var(--ink-soft);letter-spacing:.3px}
+  input[type=text],input[type=tel],input[type=date],input[type=number],select,textarea{font-family:inherit;font-size:14px;color:var(--ink);background:var(--white);border:1px solid var(--line);border-radius:8px;padding:9px 11px;width:100%}
+  textarea{resize:vertical;min-height:48px}
+
+  /* priced checklist rows */
+  .rows{display:flex;flex-direction:column;gap:7px}
+  .prow{display:grid;grid-template-columns:20px 1fr 150px 34px;gap:9px;align-items:center;background:var(--paper);border:1px solid var(--line);border-radius:9px;padding:7px 9px}
+  .prow.off{opacity:.5;border-style:dashed;background:transparent}
+  .prow input[type=checkbox]{width:17px;height:17px;accent-color:var(--emerald);cursor:pointer;margin:0}
+  .prow .name{border:1px solid transparent;background:transparent;font-size:13.5px;font-weight:600}
+  .prow .name:focus{background:var(--white);border-color:var(--gold)}
+  .prow .price-cell{position:relative}
+  .prow .price-cell .rp{position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--ink-soft);font-weight:600;pointer-events:none}
+  .prow .price-cell input{padding-left:28px;font-size:13px;font-weight:600;text-align:right;background:var(--white)}
+  .prow .del{border:none;background:transparent;color:#c3b9a3;cursor:pointer;font-size:17px;line-height:1;border-radius:5px;padding:2px}
+  .prow .del:hover{color:var(--danger);background:#f7ede9}
+  .rows-head{display:grid;grid-template-columns:20px 1fr 150px 34px;gap:9px;padding:0 9px 4px;font-size:10.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--ink-soft)}
+  .rows-head span:nth-child(3){text-align:right}
+  .add-btn{align-self:flex-start;margin-top:8px;font-family:inherit;font-size:12.5px;font-weight:600;color:var(--emerald);background:transparent;border:1px dashed var(--gold);border-radius:7px;padding:7px 13px;cursor:pointer}
+  .add-btn:hover{background:rgba(182,134,44,.1)}
+
+  .totals{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:6px}
+  .tbox{border:1px solid var(--line);border-radius:9px;padding:11px 14px;background:var(--paper)}
+  .tbox.main{background:linear-gradient(135deg,var(--emerald),var(--emerald-deep));border-color:var(--gold)}
+  .tbox .k{font-size:10.5px;letter-spacing:.5px;text-transform:uppercase;color:var(--ink-soft);font-weight:600}
+  .tbox.main .k{color:var(--gold-soft)}
+  .tbox .n{font-size:17px;font-weight:800;color:var(--emerald);margin-top:2px}
+  .tbox.main .n{color:#fff}
+  .hint{font-size:11.5px;color:var(--ink-soft);margin-top:8px;font-style:italic}
+
+  .save-bar{display:flex;gap:10px;align-items:center;justify-content:flex-end;margin-top:4px}
+  .saved-flash{color:var(--ok);font-size:12.5px;font-weight:600;opacity:0;transition:opacity .3s}
+  .saved-flash.show{opacity:1}
+
+  /* ---- modal ---- */
+  .overlay{position:fixed;inset:0;background:rgba(8,32,26,.55);display:none;align-items:flex-start;justify-content:center;padding:26px 16px;overflow:auto;z-index:50}
+  .overlay.open{display:flex}
+  .modal{background:var(--paper);border-radius:14px;width:100%;max-width:620px;box-shadow:0 25px 60px -20px rgba(0,0,0,.5);overflow:hidden}
+  .modal-head{background:var(--emerald);color:#f3ecd8;padding:15px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid var(--gold)}
+  .modal-head h3{font-size:15px;font-weight:700}
+  .modal-head .x{background:transparent;border:none;color:#bcd3c9;font-size:22px;cursor:pointer;line-height:1}
+  .modal-head .x:hover{color:#fff}
+  .modal-body{padding:20px;max-height:70vh;overflow:auto}
+  .modal-body .card{margin-bottom:14px;padding:15px 16px}
+  .mchecks{display:flex;flex-direction:column;gap:5px}
+  .mcheck{display:flex;align-items:center;gap:8px;font-size:13px;padding:4px 2px}
+  .mcheck input{width:16px;height:16px;accent-color:var(--emerald);margin:0}
+  .mcheck .p{margin-left:auto;font-size:12px;color:var(--ink-soft);font-weight:600}
+  .modal-foot{padding:14px 20px;background:var(--white);border-top:1px solid var(--line);display:flex;gap:10px;justify-content:flex-end}
+  .price-wrap{position:relative}
+  .price-wrap .rp{position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:14px;font-weight:600;color:var(--ink-soft);pointer-events:none}
+  .price-wrap input{padding-left:34px;font-weight:700}
+
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--emerald-deep);color:#f3ecd8;padding:11px 20px;border-radius:10px;font-size:13px;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,.3);opacity:0;pointer-events:none;transition:.25s;z-index:80;border:1px solid var(--gold)}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  @media (max-width:760px){
+    .stats,.totals{grid-template-columns:1fr}
+    .grid2{grid-template-columns:1fr}
+    .prow,.rows-head{grid-template-columns:20px 1fr 110px 30px}
+    thead th.hide,tbody td.hide{display:none}
+  }
+</style>
 </head>
-<body class="bg-[#F8FAFC] min-h-screen">
-
-    <nav class="bg-white border-b border-gray-100 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16 items-center">
-                <div class="flex items-center gap-2">
-                    <div class="bg-blue-600 p-2 rounded-lg text-white">
-                        <i data-lucide="package" class="w-6 h-6"></i>
-                    </div>
-                    <span class="text-xl font-bold text-gray-800">Uberpaket<span class="text-blue-600">Cashless</span></span>
-                </div>
-                <div id="nav-actions"></div>
-            </div>
-        </div>
-    </nav>
-
-    <main id="app-content" class="pb-20"></main>
-
-    <footer class="py-12 border-t border-gray-100 text-center text-gray-400 text-xs">
-        <p>© 2024 Uberpaket Cashless Rekap System • Powered by Supabase</p>
-    </footer>
-
-    <!-- Overlay Loader -->
-    <div id="global-loader" class="fixed inset-0 bg-white/80 z-[100] flex flex-col items-center justify-center hidden">
-        <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12 mb-4"></div>
-        <p class="text-blue-600 font-bold" id="loader-text">Memproses...</p>
+<body>
+  <div class="topbar">
+    <div class="kaaba">☪</div>
+    <div>
+      <h1>Panel Admin — Penawaran Umroh</h1>
+      <div class="sub">Rekap data jamaah &amp; pengaturan harga komponen</div>
     </div>
+    <div class="spacer"></div>
+    <button class="btn btn-gold" id="btnNew">+ Buat Penawaran Baru</button>
+  </div>
 
-    <!-- Modal Pesan/Alert Kustom -->
-    <div id="msg-modal" class="fixed inset-0 bg-black/50 z-[120] flex items-center justify-center hidden modal-enter">
-        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-xs text-center border modal-content-enter">
-            <div id="msg-icon-area" class="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4"></div>
-            <h3 id="msg-title" class="font-bold text-gray-800 mb-2">Pesan</h3>
-            <p id="msg-text" class="text-sm text-gray-500 mb-6"></p>
-            <button onclick="closeMsgModal()" class="w-full py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-bold transition-colors">Tutup</button>
+  <div class="tabs">
+    <button class="tab active" data-view="rekap">Rekap Data</button>
+    <button class="tab" data-view="setting">Pengaturan Harga</button>
+  </div>
+
+  <div class="wrap">
+    <!-- ================= REKAP ================= -->
+    <section class="view active" id="view-rekap">
+      <div class="stats">
+        <div class="stat"><div class="lbl">Total Penawaran</div><div class="val" id="stCount">0</div></div>
+        <div class="stat"><div class="lbl">Total Nilai Penawaran</div><div class="val" id="stValue">Rp 0</div></div>
+        <div class="stat"><div class="lbl">Rata-rata Harga Paket</div><div class="val" id="stAvg">Rp 0</div></div>
+      </div>
+
+      <div class="toolbar">
+        <div class="search"><input type="text" id="q" placeholder="Cari nama, program, atau no. HP…"></div>
+        <button class="btn btn-ghost btn-sm" id="btnCsv">Export CSV</button>
+        <button class="btn btn-ghost btn-sm" id="btnJson">Backup JSON</button>
+        <button class="btn btn-ghost btn-sm" id="btnImport">Impor JSON</button>
+        <input type="file" id="fileImport" accept=".json" hidden>
+      </div>
+
+      <div class="tbl-card">
+        <table>
+          <thead>
+            <tr>
+              <th>Nama Jamaah</th>
+              <th class="hide">Program</th>
+              <th>Kelas</th>
+              <th class="hide">No. HP</th>
+              <th class="hide">Berangkat</th>
+              <th>Harga</th>
+              <th style="text-align:right">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+        <div class="empty-state" id="emptyState">
+          <div class="big">☪</div>
+          <div>Belum ada penawaran tersimpan.</div>
+          <div style="margin-top:12px"><button class="btn btn-emerald btn-sm" onclick="document.getElementById('btnNew').click()">Buat penawaran pertama</button></div>
         </div>
-    </div>
+      </div>
+    </section>
 
-    <!-- Modal PIN Owner -->
-    <div id="pin-modal" class="fixed inset-0 bg-black/50 z-[110] flex items-center justify-center hidden modal-enter">
-        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-xs text-center border modal-content-enter">
-            <i data-lucide="key-round" class="text-amber-600 w-10 h-10 mx-auto mb-4"></i>
-            <h3 class="font-bold text-gray-800 mb-2">PIN Owner Dibutuhkan</h3>
-            <input type="password" id="pin-input" maxlength="6" placeholder="••••••" class="w-full text-center text-2xl font-bold p-3 border rounded-xl mb-4 bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none">
-            <div class="flex gap-2">
-                <button onclick="togglePinModal(false)" class="flex-1 py-2 text-gray-500 font-bold">Batal</button>
-                <button onclick="verifyOwnerPin()" class="flex-1 py-2 bg-blue-600 text-white rounded-xl font-bold">Buka</button>
-            </div>
+    <!-- ================= SETTING ================= -->
+    <section class="view" id="view-setting">
+      <div class="card">
+        <h2><span class="no">١</span>Paket Dasar</h2>
+        <div class="grid2">
+          <div class="field"><label>Hotel Makkah</label><input type="text" id="sMakkah"></div>
+          <div class="field"><label>Hotel Madinah</label><input type="text" id="sMadinah"></div>
+          <div class="field"><label>Hotel Jakarta</label><input type="text" id="sJakarta"></div>
+          <div class="field"><label>Pesawat</label><input type="text" id="sPesawat"></div>
+          <div class="field"><label>Harga Dasar Paket (headline)</label>
+            <div class="price-wrap"><span class="rp">Rp</span><input type="number" id="sBase" step="100000"></div>
+          </div>
+          <div class="field"><label>Keterangan Harga</label><input type="text" id="sKet"></div>
         </div>
-    </div>
+      </div>
 
-    <!-- Modal Konfirmasi Hapus -->
-    <div id="confirm-modal" class="fixed inset-0 bg-black/50 z-[110] flex items-center justify-center hidden modal-enter">
-        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm text-center border modal-content-enter">
-            <div class="bg-red-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
-                <i data-lucide="trash-2" class="text-red-600 w-8 h-8"></i>
-            </div>
-            <h3 id="confirm-title" class="font-black text-gray-900 text-xl mb-2">Konfirmasi Hapus</h3>
-            <p id="confirm-text" class="text-sm text-gray-500 mb-8 px-4"></p>
-            <div class="flex gap-3">
-                <button onclick="toggleConfirmModal(false)" class="flex-1 py-3 text-gray-500 font-bold hover:bg-gray-50 rounded-xl transition-colors">Batal</button>
-                <button id="confirm-execute-btn" class="flex-1 py-3 bg-red-600 text-white rounded-xl font-bold shadow-lg shadow-red-100 hover:bg-red-700 transition-all">Ya, Hapus</button>
-            </div>
+      <div class="card">
+        <h2><span class="no">٢</span>Komponen Harga Termasuk</h2>
+        <div class="rows-head"><span>Aktif</span><span>Nama Komponen</span><span>Harga (opsional)</span><span></span></div>
+        <div class="rows" id="incRows"></div>
+        <button class="add-btn" data-target="incRows">+ Tambah komponen termasuk</button>
+      </div>
+
+      <div class="card">
+        <h2><span class="no">٣</span>Komponen Tidak Termasuk</h2>
+        <div class="rows-head"><span>Aktif</span><span>Nama Komponen</span><span>Estimasi (opsional)</span><span></span></div>
+        <div class="rows" id="excRows"></div>
+        <button class="add-btn" data-target="excRows">+ Tambah komponen tidak termasuk</button>
+      </div>
+
+      <div class="card">
+        <h2><span class="no">٤</span>Ringkasan Harga</h2>
+        <div class="totals">
+          <div class="tbox main"><div class="k">Harga Dasar Paket</div><div class="n" id="tBase">Rp 0</div></div>
+          <div class="tbox"><div class="k">Subtotal Komponen Termasuk</div><div class="n" id="tInc">Rp 0</div></div>
+          <div class="tbox"><div class="k">Estimasi Tidak Termasuk</div><div class="n" id="tExc">Rp 0</div></div>
         </div>
-    </div>
-
-    <!-- Modal Reset Data -->
-    <div id="reset-modal" class="fixed inset-0 bg-black/50 z-[110] flex items-center justify-center hidden modal-enter">
-        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm text-center border modal-content-enter">
-            <div class="bg-red-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
-                <i data-lucide="alert-triangle" class="text-red-600 w-8 h-8"></i>
-            </div>
-            <h3 class="font-black text-gray-900 text-xl mb-2">Hapus Seluruh Data?</h3>
-            <p class="text-sm text-gray-500 mb-6 text-center leading-relaxed">Tindakan ini akan menghapus <b>seluruh rekaman pengiriman</b> di bank data secara permanen. Ketik <span class="text-red-600 font-black">reset</span> di bawah untuk melanjutkan.</p>
-            <input type="text" id="reset-confirm-input" placeholder="Ketik 'reset' di sini" class="w-full text-center p-4 border-2 border-gray-100 rounded-2xl mb-6 focus:border-red-500 outline-none font-bold">
-            <div class="flex gap-3">
-                <button onclick="toggleResetModal(false)" class="flex-1 py-3 text-gray-500 font-bold hover:bg-gray-50 rounded-xl transition-colors">Batal</button>
-                <button onclick="executeFullReset()" class="flex-1 py-3 bg-red-600 text-white rounded-xl font-bold shadow-lg shadow-red-100 hover:bg-red-700 transition-all">Hapus Semua</button>
-            </div>
+        <p class="hint">Subtotal komponen bersifat informatif (rincian internal). Harga yang tampil di penawaran memakai <b>Harga Dasar Paket</b>, dan bisa diganti per jamaah saat membuat penawaran.</p>
+        <div class="save-bar">
+          <span class="saved-flash" id="savedFlash">✓ Pengaturan tersimpan</span>
+          <button class="btn btn-emerald" id="btnSaveSettings">Simpan Pengaturan</button>
         </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ================= MODAL ================= -->
+  <div class="overlay" id="overlay">
+    <div class="modal">
+      <div class="modal-head">
+        <h3 id="modalTitle">Buat Penawaran Baru</h3>
+        <button class="x" id="modalX">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="mId">
+        <div class="card">
+          <div class="grid2">
+            <div class="field full"><label>Nama Calon Jamaah</label><input type="text" id="mNama" placeholder="Bapak Ahmad Fauzi"></div>
+            <div class="field"><label>Program</label><input type="text" id="mProgram" placeholder="Umroh Reguler 9 Hari"></div>
+            <div class="field"><label>Kelas</label><input type="text" id="mKelas" placeholder="Quad / Triple / Double"></div>
+            <div class="field"><label>No. HP</label><input type="tel" id="mHp" placeholder="0812-xxxx-xxxx"></div>
+            <div class="field"><label>Tanggal Berangkat</label><input type="date" id="mTgl"></div>
+            <div class="field full"><label>Harga Paket (headline)</label>
+              <div class="price-wrap"><span class="rp">Rp</span><input type="number" id="mHarga" step="100000"></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <label style="display:block;margin-bottom:8px;color:var(--emerald);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.6px">Harga Termasuk</label>
+          <div class="mchecks" id="mInc"></div>
+        </div>
+        <div class="card">
+          <label style="display:block;margin-bottom:8px;color:var(--emerald);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.6px">Harga Tidak Termasuk</label>
+          <div class="mchecks" id="mExc"></div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-ghost" id="modalCancel">Batal</button>
+        <button class="btn btn-emerald" id="modalSave">Simpan Penawaran</button>
+      </div>
     </div>
+  </div>
 
-    <script>
-        const SUPABASE_URL = "https://cdvpmtnjkqjzruffsoyz.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNkdnBtdG5qa3FqenJ1ZmZzb3l6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkzNDI1MDYsImV4cCI6MjA4NDkxODUwNn0.tDa9YhKMpV7wzBiOjdjgHiWii59UTZHW2Chb9O6JKwU";
-        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  <div class="toast" id="toast"></div>
 
-        let state = {
-            view: 'login',
-            user: null,
-            shipments: [],
-            settings: [],
-            showCommission: false,
-            dateRange: {
-                start: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0],
-                end: new Date().toISOString().split('T')[0]
-            },
-            inputRows: [{ expedition: '', count: '' }],
-            charts: { line: null, pie: null }
-        };
+<script>
+  // ---------- defaults ----------
+  const DEFAULT_SETTINGS = {
+    makkah:"Maysan Al Maqam / Setaraf", madinah:"Jawharat Arasyed / Setaraf",
+    jakarta:"Ibis", pesawat:"Saudi Airlines", base:36500000, ket:"All in dari Kuningan",
+    inc:[
+      "Tiket Ekonomi PP","Visa Umroh","Transportasi AC","Hotel Sesuai Paket",
+      "Makan 3x Sehari (Fullboard)","Zam-zam 5 Liter","Handling Jakarta","Handling Saudi",
+      "Muthawif","City Tour Makkah, Madinah & Jeddah","Manasik 1 Kali","Perlengkapan","Transport Kuningan PP"
+    ].map(n=>({name:n,price:0,active:true})),
+    exc:[
+      "Pembuatan Paspor","Suntik Meningitis & Polio","Pengeluaran Pribadi","Over Bagasi"
+    ].map(n=>({name:n,price:0,active:true}))
+  };
 
-        const OWNER_PIN = "131313";
+  // ---------- storage (graceful: works locally, degrades in sandbox) ----------
+  const store = {
+    get(k,f){ try{const v=localStorage.getItem(k);return v?JSON.parse(v):f;}catch(e){return f;} },
+    set(k,v){ try{localStorage.setItem(k,JSON.stringify(v));}catch(e){/* memory-only fallback */} }
+  };
+  let settings = store.get('umroh_settings', JSON.parse(JSON.stringify(DEFAULT_SETTINGS)));
+  let offers   = store.get('umroh_offers', []);
 
-        window.addEventListener('load', async () => {
-            lucide.createIcons();
-            await checkAuth();
-            await loadData();
-            showView(state.user ? 'dashboard' : 'login');
-        });
+  // ---------- helpers ----------
+  const $ = id => document.getElementById(id);
+  const rupiah = n => 'Rp ' + (Number(n)||0).toLocaleString('id-ID');
+  function fmtDate(v){ if(!v) return '—'; const d=new Date(v+'T00:00:00'); return d.toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'}); }
+  function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2200); }
 
-        async function checkAuth() {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            state.user = session?.user || null;
-            updateNavbar();
-        }
+  // ---------- tabs ----------
+  document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active'); $('view-'+t.dataset.view).classList.add('active');
+  }));
 
-        async function loadData() {
-            const { data: shipData } = await supabaseClient.from('shipments').select('*').order('tanggal', { ascending: false });
-            const { data: settingsData } = await supabaseClient.from('settings').select('*');
-            if (shipData) state.shipments = shipData;
-            if (settingsData) state.settings = settingsData;
-            
-            if (state.view === 'dashboard') renderDashboard();
-            if (state.view === 'settings') renderSettings();
-            if (state.view === 'analytics') renderAnalytics();
-        }
+  // ================= SETTINGS UI =================
+  function fillSettingsForm(){
+    $('sMakkah').value=settings.makkah; $('sMadinah').value=settings.madinah;
+    $('sJakarta').value=settings.jakarta; $('sPesawat').value=settings.pesawat;
+    $('sBase').value=settings.base; $('sKet').value=settings.ket;
+    renderRows('incRows',settings.inc); renderRows('excRows',settings.exc);
+    recalc();
+  }
+  function renderRows(boxId,arr){
+    const box=$(boxId); box.innerHTML='';
+    arr.forEach(item=>box.appendChild(makePriceRow(item)));
+  }
+  function makePriceRow(item){
+    const row=document.createElement('div');
+    row.className='prow'+(item.active?'':' off');
+    const cb=document.createElement('input'); cb.type='checkbox'; cb.checked=item.active;
+    const name=document.createElement('input'); name.type='text'; name.className='name'; name.value=item.name;
+    const pc=document.createElement('div'); pc.className='price-cell';
+    const rp=document.createElement('span'); rp.className='rp'; rp.textContent='Rp';
+    const price=document.createElement('input'); price.type='number'; price.step='50000'; price.value=item.price||''; price.placeholder='0';
+    pc.append(rp,price);
+    const del=document.createElement('button'); del.className='del'; del.type='button'; del.innerHTML='&times;';
+    cb.addEventListener('change',()=>{row.classList.toggle('off',!cb.checked);recalc();});
+    price.addEventListener('input',recalc);
+    del.addEventListener('click',()=>{row.remove();recalc();});
+    row.append(cb,name,pc,del);
+    // stash refs for reading
+    row._read = ()=>({name:name.value.trim(),price:Number(price.value)||0,active:cb.checked});
+    return row;
+  }
+  function readRows(boxId){
+    return [...$(boxId).children].map(r=>r._read()).filter(x=>x.name);
+  }
+  function recalc(){
+    const base=Number($('sBase').value)||0;
+    const inc=readRows('incRows').filter(x=>x.active).reduce((s,x)=>s+x.price,0);
+    const exc=readRows('excRows').filter(x=>x.active).reduce((s,x)=>s+x.price,0);
+    $('tBase').textContent=rupiah(base);
+    $('tInc').textContent=rupiah(inc);
+    $('tExc').textContent=rupiah(exc);
+  }
+  document.querySelectorAll('.add-btn').forEach(b=>b.addEventListener('click',()=>{
+    $(b.dataset.target).appendChild(makePriceRow({name:'',price:0,active:true}));
+  }));
+  $('sBase').addEventListener('input',recalc);
 
-        function showView(viewName) {
-            state.view = viewName;
-            const content = document.getElementById('app-content');
-            updateNavbar();
+  $('btnSaveSettings').addEventListener('click',()=>{
+    settings={
+      makkah:$('sMakkah').value.trim(),madinah:$('sMadinah').value.trim(),
+      jakarta:$('sJakarta').value.trim(),pesawat:$('sPesawat').value.trim(),
+      base:Number($('sBase').value)||0,ket:$('sKet').value.trim(),
+      inc:readRows('incRows'),exc:readRows('excRows')
+    };
+    store.set('umroh_settings',settings);
+    const f=$('savedFlash'); f.classList.add('show'); setTimeout(()=>f.classList.remove('show'),1800);
+    toast('Pengaturan harga tersimpan');
+  });
 
-            if (viewName === 'login') {
-                content.innerHTML = renderLogin();
-            } else if (viewName === 'dashboard') {
-                renderDashboard();
-            } else if (viewName === 'settings') {
-                renderSettings();
-            } else if (viewName === 'analytics') {
-                renderAnalytics();
-            }
-            lucide.createIcons();
-        }
+  // ================= REKAP UI =================
+  function renderTable(){
+    const q=$('q').value.trim().toLowerCase();
+    const list=offers.filter(o=>!q || (o.nama+o.program+o.hp+o.kelas).toLowerCase().includes(q));
+    const tb=$('tbody'); tb.innerHTML='';
+    $('emptyState').style.display = offers.length ? 'none':'block';
+    list.forEach(o=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML=`
+        <td class="nama">${esc(o.nama)||'—'}</td>
+        <td class="hide">${esc(o.program)||'—'}</td>
+        <td>${esc(o.kelas)||'—'}</td>
+        <td class="hide">${esc(o.hp)||'—'}</td>
+        <td class="hide">${fmtDate(o.tgl)}</td>
+        <td class="harga">${rupiah(o.harga)}</td>
+        <td class="act">
+          <button class="btn btn-ghost btn-sm" data-edit="${o.id}">Edit</button>
+          <button class="btn btn-danger-ghost btn-sm" data-del="${o.id}">Hapus</button>
+        </td>`;
+      tb.appendChild(tr);
+    });
+    // stats
+    $('stCount').textContent=offers.length;
+    const total=offers.reduce((s,o)=>s+(Number(o.harga)||0),0);
+    $('stValue').textContent=rupiah(total);
+    $('stAvg').textContent=offers.length?rupiah(Math.round(total/offers.length)):'Rp 0';
+  }
+  function esc(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 
-        function updateNavbar() {
-            const nav = document.getElementById('nav-actions');
-            if (!state.user) {
-                nav.innerHTML = '';
-            } else {
-                nav.innerHTML = `
-                    <div class="flex items-center gap-2">
-                        <button onclick="showView('dashboard')" title="Dashboard" class="p-2 rounded-lg ${state.view === 'dashboard' ? 'tab-active' : 'text-gray-500 hover:bg-gray-50'}"><i data-lucide="layout-dashboard"></i></button>
-                        <button onclick="showView('analytics')" title="Analisa Statistik" class="p-2 rounded-lg ${state.view === 'analytics' ? 'tab-active' : 'text-gray-500 hover:bg-gray-50'}"><i data-lucide="bar-chart-3"></i></button>
-                        <button onclick="showView('settings')" title="Pengaturan" class="p-2 rounded-lg ${state.view === 'settings' ? 'tab-active' : 'text-gray-500 hover:bg-gray-50'}"><i data-lucide="settings"></i></button>
-                        <button onclick="handleLogout()" title="Keluar" class="p-2 text-red-500 hover:bg-red-50 rounded-lg"><i data-lucide="log-out"></i></button>
-                    </div>
-                `;
-            }
-            lucide.createIcons();
-        }
+  $('q').addEventListener('input',renderTable);
+  $('tbody').addEventListener('click',e=>{
+    const ed=e.target.dataset.edit, dl=e.target.dataset.del;
+    if(ed) openModal(offers.find(o=>o.id===ed));
+    if(dl){ if(confirm('Hapus penawaran ini?')){ offers=offers.filter(o=>o.id!==dl); persistOffers(); renderTable(); toast('Penawaran dihapus'); } }
+  });
+  function persistOffers(){ store.set('umroh_offers',offers); }
 
-        function renderLogin() {
-            return `
-                <div class="max-w-md mx-auto px-4 py-20 text-center">
-                    <div class="bg-white p-10 rounded-[2.5rem] shadow-2xl border border-gray-100">
-                        <div class="bg-blue-600 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-200">
-                            <i data-lucide="shield-check" class="text-white w-8 h-8"></i>
-                        </div>
-                        <h2 class="text-3xl font-bold text-gray-900 mb-8">Admin Login</h2>
-                        <input type="email" id="login-email" placeholder="Email" class="w-full p-4 border rounded-2xl mb-4 focus:ring-2 focus:ring-blue-500 outline-none">
-                        <input type="password" id="login-password" placeholder="Password" class="w-full p-4 border rounded-2xl mb-6 focus:ring-2 focus:ring-blue-500 outline-none">
-                        <button onclick="handleLogin()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold shadow-xl shadow-blue-100 transition-all active:scale-95">Masuk Dashboard</button>
-                    </div>
-                </div>
-            `;
-        }
+  // ================= MODAL =================
+  function openModal(offer){
+    $('modalTitle').textContent = offer ? 'Edit Penawaran' : 'Buat Penawaran Baru';
+    $('mId').value = offer?offer.id:'';
+    $('mNama').value = offer?offer.nama:'';
+    $('mProgram').value = offer?offer.program:'';
+    $('mKelas').value = offer?offer.kelas:'';
+    $('mHp').value = offer?offer.hp:'';
+    $('mTgl').value = offer?offer.tgl:'';
+    $('mHarga').value = offer?offer.harga:settings.base;
+    // checklists from active settings; per-offer selection remembered on edit
+    buildChecks('mInc', settings.inc, offer?offer.inc:null);
+    buildChecks('mExc', settings.exc, offer?offer.exc:null);
+    $('overlay').classList.add('open');
+  }
+  function buildChecks(boxId, master, selected){
+    const box=$(boxId); box.innerHTML='';
+    master.filter(m=>m.active).forEach(m=>{
+      const id=boxId+'_'+Math.random().toString(36).slice(2,7);
+      const wrap=document.createElement('label'); wrap.className='mcheck'; wrap.setAttribute('for',id);
+      const cb=document.createElement('input'); cb.type='checkbox'; cb.id=id; cb.dataset.name=m.name;
+      cb.checked = selected ? selected.includes(m.name) : true;
+      const span=document.createElement('span'); span.textContent=m.name;
+      wrap.append(cb,span);
+      if(m.price>0){ const p=document.createElement('span'); p.className='p'; p.textContent=rupiah(m.price); wrap.append(p); }
+      box.appendChild(wrap);
+    });
+  }
+  function readChecks(boxId){
+    return [...$(boxId).querySelectorAll('input:checked')].map(c=>c.dataset.name);
+  }
+  function closeModal(){ $('overlay').classList.remove('open'); }
 
-        function renderDashboard() {
-            const filtered = state.shipments.filter(s => s.tanggal >= state.dateRange.start && s.tanggal <= state.dateRange.end);
-            const totalShipments = filtered.reduce((acc, curr) => acc + (Number(curr.poin) || 0), 0);
-            const totalCommission = filtered.reduce((acc, curr) => acc + (Number(curr.komisi) || 0), 0);
+  $('btnNew').addEventListener('click',()=>openModal(null));
+  $('modalX').addEventListener('click',closeModal);
+  $('modalCancel').addEventListener('click',closeModal);
+  $('overlay').addEventListener('click',e=>{ if(e.target===$('overlay')) closeModal(); });
 
-            const content = document.getElementById('app-content');
-            content.innerHTML = `
-                <div class="max-w-7xl mx-auto px-4 py-8 space-y-8 animate-in fade-in duration-500">
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                        <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Dashboard Admin</h1>
-                        <div class="bg-white p-2 rounded-2xl border shadow-sm flex items-center gap-2">
-                             <input type="date" id="input-date" value="${new Date().toISOString().split('T')[0]}" class="px-4 py-2 bg-gray-50 rounded-xl font-bold text-gray-700 outline-none">
-                        </div>
-                    </div>
+  $('modalSave').addEventListener('click',()=>{
+    const nama=$('mNama').value.trim();
+    if(!nama){ toast('Nama jamaah wajib diisi'); $('mNama').focus(); return; }
+    const data={
+      id:$('mId').value||('o_'+Date.now()),
+      nama, program:$('mProgram').value.trim(), kelas:$('mKelas').value.trim(),
+      hp:$('mHp').value.trim(), tgl:$('mTgl').value, harga:Number($('mHarga').value)||0,
+      inc:readChecks('mInc'), exc:readChecks('mExc'),
+      hotel:{makkah:settings.makkah,madinah:settings.madinah,jakarta:settings.jakarta,pesawat:settings.pesawat},
+      ket:settings.ket, ts:Date.now()
+    };
+    const i=offers.findIndex(o=>o.id===data.id);
+    if(i>=0) offers[i]=data; else offers.unshift(data);
+    persistOffers(); renderTable(); closeModal();
+    toast(i>=0?'Penawaran diperbarui':'Penawaran tersimpan');
+  });
 
-                    <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100">
-                        <div class="flex justify-between items-center mb-6">
-                            <h3 class="font-black text-gray-800 text-lg flex items-center gap-2"><i data-lucide="plus-circle" class="text-blue-600"></i> Input Data Pengiriman</h3>
-                            <button onclick="addInputRow()" class="text-blue-600 font-bold flex items-center gap-1 text-sm hover:underline"><i data-lucide="plus" class="w-4 h-4"></i> Tambah Baris</button>
-                        </div>
-                        <div class="overflow-x-auto mb-6">
-                            <table class="w-full text-left border-collapse">
-                                <thead class="text-[10px] font-black uppercase text-gray-400 tracking-widest border-b">
-                                    <tr>
-                                        <th class="py-3 px-2">Nama Ekspedisi</th>
-                                        <th class="py-3 px-2">Jumlah Paket</th>
-                                        <th class="py-3 px-2 text-right">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="input-table-body" class="divide-y">
-                                    ${state.inputRows.map((row, index) => `
-                                        <tr>
-                                            <td class="py-4 px-2">
-                                                <select onchange="updateInputRow(${index}, 'expedition', this.value)" class="w-full p-3 bg-gray-50 rounded-xl border-none font-bold text-gray-700 focus:ring-2 focus:ring-blue-500 outline-none">
-                                                    <option value="">Pilih Ekspedisi...</option>
-                                                    ${state.settings.map(s => `<option value="${s.name}" ${row.expedition === s.name ? 'selected' : ''}>${s.name.toUpperCase()}</option>`).join('')}
-                                                </select>
-                                            </td>
-                                            <td class="py-4 px-2">
-                                                <input type="number" value="${row.count}" oninput="updateInputRow(${index}, 'count', this.value)" placeholder="0" class="w-full p-3 bg-gray-50 rounded-xl border-none font-bold text-gray-700 focus:ring-2 focus:ring-blue-500 outline-none">
-                                            </td>
-                                            <td class="py-4 px-2 text-right">
-                                                <button onclick="removeInputRow(${index})" class="p-2 text-red-400 hover:text-red-600"><i data-lucide="x" class="w-5 h-5"></i></button>
-                                            </td>
-                                        </tr>
-                                    `).join('')}
-                                </tbody>
-                            </table>
-                        </div>
-                        <button onclick="submitInputData()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black shadow-xl shadow-blue-100 hover:bg-blue-700 transition-all active:scale-[0.99]">Simpan ke Bank Data</button>
-                    </div>
+  // ================= EXPORT / IMPORT =================
+  $('btnJson').addEventListener('click',()=>{
+    download('penawaran-umroh-backup.json', JSON.stringify({settings,offers},null,2));
+  });
+  $('btnCsv').addEventListener('click',()=>{
+    if(!offers.length){ toast('Belum ada data untuk diexport'); return; }
+    const head=['Nama','Program','Kelas','No HP','Tanggal Berangkat','Harga','Termasuk','Tidak Termasuk'];
+    const rows=offers.map(o=>[o.nama,o.program,o.kelas,o.hp,o.tgl,o.harga,(o.inc||[]).join('; '),(o.exc||[]).join('; ')]
+      .map(c=>`"${String(c==null?'':c).replace(/"/g,'""')}"`).join(','));
+    download('rekap-penawaran-umroh.csv', head.join(',')+'\n'+rows.join('\n'));
+  });
+  $('btnImport').addEventListener('click',()=>$('fileImport').click());
+  $('fileImport').addEventListener('change',e=>{
+    const f=e.target.files[0]; if(!f) return;
+    const r=new FileReader();
+    r.onload=()=>{ try{
+      const d=JSON.parse(r.result);
+      if(d.settings) settings=d.settings;
+      if(Array.isArray(d.offers)) offers=d.offers;
+      store.set('umroh_settings',settings); persistOffers();
+      fillSettingsForm(); renderTable(); toast('Data berhasil diimpor');
+    }catch(err){ toast('File tidak valid'); } };
+    r.readAsText(f); e.target.value='';
+  });
+  function download(name,content){
+    const blob=new Blob([content],{type:'text/plain;charset=utf-8'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  }
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100 flex items-center justify-between overflow-hidden relative">
-                            <div class="flex items-center gap-6 relative z-10">
-                                <div class="bg-green-100 p-5 rounded-3xl text-green-600 transition-transform relative"><i data-lucide="banknote" class="w-10 h-10"></i></div>
-                                <div>
-                                    <p class="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-1">Total Komisi</p>
-                                    <p class="text-4xl font-black ${state.showCommission ? 'text-gray-900' : 'text-gray-200'}">
-                                        ${state.showCommission ? 'Rp ' + totalCommission.toLocaleString('id-ID') : 'Rp ••••••••'}
-                                    </p>
-                                </div>
-                            </div>
-                            <button onclick="${state.showCommission ? 'toggleCommission(false)' : 'togglePinModal(true)'}" class="p-4 rounded-2xl bg-gray-50 text-gray-400 z-10 hover:bg-gray-100 transition-colors">
-                                <i data-lucide="${state.showCommission ? 'eye-off' : 'lock'}"></i>
-                            </button>
-                            <div class="absolute top-0 right-0 -mr-10 -mt-10 w-40 h-40 bg-green-50 rounded-full opacity-30"></div>
-                        </div>
-                        
-                        <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100 flex items-center gap-6 overflow-hidden relative group">
-                            <div class="bg-blue-100 p-5 rounded-3xl text-blue-600 transition-transform relative z-10"><i data-lucide="package" class="w-10 h-10"></i></div>
-                            <div class="relative z-10">
-                                <p class="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-1">Total Kiriman</p>
-                                <p class="text-4xl font-black text-gray-900">${totalShipments.toLocaleString('id-ID')} <span class="text-lg font-bold text-gray-300">Paket</span></p>
-                            </div>
-                            <div class="absolute top-0 right-0 -mr-10 -mt-10 w-40 h-40 bg-blue-50 rounded-full opacity-30"></div>
-                        </div>
-                    </div>
-
-                    <div class="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 overflow-hidden">
-                        <div class="p-8 border-b border-gray-50 flex flex-col md:flex-row justify-between items-center bg-gray-50/20 gap-4">
-                            <h3 class="font-black text-gray-900 text-xl text-center md:text-left">Bank Data Rekapitulasi</h3>
-                            <div class="flex items-center gap-4 bg-white p-2 rounded-2xl border shadow-sm">
-                                <input type="date" value="${state.dateRange.start}" onchange="updateDateRange('start', this.value)" class="bg-transparent px-2 font-bold text-xs text-gray-600 outline-none">
-                                <span class="text-gray-300 font-bold">s/d</span>
-                                <input type="date" value="${state.dateRange.end}" onchange="updateDateRange('end', this.value)" class="bg-transparent px-2 font-bold text-xs text-gray-600 outline-none">
-                            </div>
-                        </div>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left text-sm">
-                                <thead class="bg-gray-50/50 text-gray-400 font-black uppercase text-[10px] tracking-[0.2em] border-b">
-                                    <tr>
-                                        <th class="px-8 py-5">Tanggal</th>
-                                        <th class="px-8 py-5">Ekspedisi</th>
-                                        <th class="px-8 py-5 text-right">Jumlah</th>
-                                        <th class="px-8 py-5 text-right">Komisi</th>
-                                        <th class="px-8 py-5 text-right">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-50">
-                                    ${filtered.map(item => `
-                                        <tr class="hover:bg-blue-50/20 transition-colors group">
-                                            <td class="px-8 py-5 text-gray-500 font-bold">${new Date(item.tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
-                                            <td class="px-8 py-5 font-black uppercase text-[11px] tracking-wide text-gray-700">${item.nama_ekspedisi}</td>
-                                            <td class="px-8 py-5 text-right"><span class="bg-blue-600 text-white px-3 py-1 rounded-full font-black text-[10px]">${item.poin} Pkt</span></td>
-                                            <td class="px-8 py-5 text-right font-black ${state.showCommission ? 'text-green-600' : 'text-gray-200 tracking-tighter'}">${state.showCommission ? 'Rp ' + Number(item.komisi).toLocaleString('id-ID') : '••••••'}</td>
-                                            <td class="px-8 py-5 text-right">
-                                                <button onclick="confirmDeleteEntry('${item.id}')" class="p-2 text-red-300 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-all"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                                            </td>
-                                        </tr>
-                                    `).join('') || '<tr><td colspan="5" class="p-20 text-center text-gray-400 font-medium italic">Belum ada data rekaman</td></tr>'}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            `;
-            lucide.createIcons();
-        }
-
-        // --- View Analisa Statistik ---
-        function renderAnalytics() {
-            const filtered = state.shipments.filter(s => s.tanggal >= state.dateRange.start && s.tanggal <= state.dateRange.end);
-            
-            const content = document.getElementById('app-content');
-            content.innerHTML = `
-                <div class="max-w-7xl mx-auto px-4 py-8 space-y-8 animate-in fade-in duration-500">
-                    <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-                        <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Analisa Statistik</h1>
-                        <div class="flex items-center gap-4 bg-white p-2 rounded-2xl border shadow-sm">
-                            <input type="date" value="${state.dateRange.start}" onchange="updateDateRange('start', this.value)" class="bg-transparent px-2 font-bold text-xs text-gray-600 outline-none">
-                            <span class="text-gray-300 font-bold">s/d</span>
-                            <input type="date" value="${state.dateRange.end}" onchange="updateDateRange('end', this.value)" class="bg-transparent px-2 font-bold text-xs text-gray-600 outline-none">
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        <div class="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
-                            <h3 class="font-black text-gray-800 text-lg mb-6 flex items-center gap-2"><i data-lucide="trending-up" class="text-blue-600"></i> Tren Pengiriman Harian</h3>
-                            <div class="h-64 relative">
-                                <canvas id="growthChart"></canvas>
-                            </div>
-                        </div>
-
-                        <div class="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
-                            <h3 class="font-black text-gray-800 text-lg mb-6 flex items-center gap-2"><i data-lucide="pie-chart" class="text-purple-600"></i> Distribusi Ekspedisi</h3>
-                            <div class="h-64 relative">
-                                <canvas id="distChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Laporan Analisa Kenaikan/Penurunan (Baru) -->
-                    <div class="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
-                        <h3 class="font-black text-gray-800 text-lg mb-6 flex items-center gap-2"><i data-lucide="trending-up" class="text-blue-600"></i> Analisa Perubahan Volume Per Ekspedisi</h3>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left text-sm">
-                                <thead class="bg-gray-50/50 text-gray-400 font-black uppercase text-[10px] tracking-widest border-b">
-                                    <tr>
-                                        <th class="px-6 py-4">Ekspedisi</th>
-                                        <th class="px-6 py-4 text-center">Periode Awal</th>
-                                        <th class="px-6 py-4 text-center">Periode Akhir</th>
-                                        <th class="px-6 py-4 text-center">Perubahan</th>
-                                        <th class="px-6 py-4 text-right">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="growth-table-body" class="divide-y divide-gray-50">
-                                    <!-- Diisi oleh JS -->
-                                </tbody>
-                            </table>
-                        </div>
-                        <div id="analysis-insights" class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
-                            <!-- Ringkasan analisa -->
-                        </div>
-                    </div>
-                </div>
-            `;
-            lucide.createIcons();
-            initAnalyticsCharts(filtered);
-        }
-
-        function initAnalyticsCharts(data) {
-            // Urutkan data berdasarkan tanggal
-            const sortedData = [...data].sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
-            
-            // 1. Logika Grafik Garis (Tren Harian)
-            const dateGroups = {};
-            sortedData.forEach(s => {
-                dateGroups[s.tanggal] = (dateGroups[s.tanggal] || 0) + Number(s.poin);
-            });
-            const sortedDates = Object.keys(dateGroups).sort();
-            const dateLabels = sortedDates.map(d => new Date(d).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' }));
-            const dateValues = sortedDates.map(d => dateGroups[d]);
-
-            // 2. Logika Grafik Pie (Distribusi)
-            const expGroups = {};
-            data.forEach(s => {
-                expGroups[s.nama_ekspedisi] = (expGroups[s.nama_ekspedisi] || 0) + Number(s.poin);
-            });
-            const expLabels = Object.keys(expGroups);
-            const expValues = Object.values(expGroups);
-
-            // 3. Analisa Kenaikan/Penurunan per Ekspedisi
-            // Bagi data menjadi 2 bagian waktu (awal dan akhir periode)
-            const uniqueDates = sortedDates;
-            const midIndex = Math.ceil(uniqueDates.length / 2);
-            const firstHalfDates = uniqueDates.slice(0, midIndex);
-            const secondHalfDates = uniqueDates.slice(midIndex);
-
-            const growthTableBody = document.getElementById('growth-table-body');
-            const allExpeditions = state.settings.map(s => s.name);
-            let growthRowsHtml = '';
-
-            allExpeditions.forEach(expName => {
-                const totalFirst = sortedData
-                    .filter(s => s.nama_ekspedisi === expName && firstHalfDates.includes(s.tanggal))
-                    .reduce((acc, curr) => acc + Number(curr.poin), 0);
-                
-                const totalSecond = sortedData
-                    .filter(s => s.nama_ekspedisi === expName && secondHalfDates.includes(s.tanggal))
-                    .reduce((acc, curr) => acc + Number(curr.poin), 0);
-
-                const diff = totalSecond - totalFirst;
-                const percent = totalFirst > 0 ? ((diff / totalFirst) * 100).toFixed(1) : (totalSecond > 0 ? "100" : "0");
-                const isGrowth = diff > 0;
-                const isDown = diff < 0;
-
-                growthRowsHtml += `
-                    <tr>
-                        <td class="px-6 py-5 font-black uppercase text-gray-700 tracking-wide text-[11px]">${expName}</td>
-                        <td class="px-6 py-5 text-center font-bold text-gray-500">${totalFirst}</td>
-                        <td class="px-6 py-5 text-center font-bold text-gray-900">${totalSecond}</td>
-                        <td class="px-6 py-5 text-center">
-                            <span class="font-black ${diff >= 0 ? 'text-green-600' : 'text-red-600'} text-xs">
-                                ${diff > 0 ? '+' : ''}${diff} (${percent}%)
-                            </span>
-                        </td>
-                        <td class="px-6 py-5 text-right">
-                            ${isGrowth ? 
-                                '<span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-[10px] font-black uppercase flex items-center justify-end gap-1"><i data-lucide="trending-up" class="w-3 h-3"></i> Naik</span>' : 
-                                (isDown ? 
-                                '<span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-[10px] font-black uppercase flex items-center justify-end gap-1"><i data-lucide="trending-down" class="w-3 h-3"></i> Turun</span>' : 
-                                '<span class="bg-gray-100 text-gray-500 px-3 py-1 rounded-full text-[10px] font-black uppercase flex items-center justify-end gap-1">Stabil</span>')}
-                        </td>
-                    </tr>
-                `;
-            });
-            growthTableBody.innerHTML = growthRowsHtml || '<tr><td colspan="5" class="p-10 text-center text-gray-400 italic font-medium">Lengkapi setidaknya 2 hari data untuk melihat analisa tren</td></tr>';
-
-            // 4. Laporan Insight
-            const totalPackets = data.reduce((a, b) => a + Number(b.poin), 0);
-            const topExp = expLabels.length > 0 ? expLabels.reduce((a, b) => expGroups[a] > expGroups[b] ? a : b) : "-";
-            const avgDaily = dateLabels.length > 0 ? (totalPackets / dateLabels.length).toFixed(1) : 0;
-
-            const insightsArea = document.getElementById('analysis-insights');
-            insightsArea.innerHTML = `
-                <div class="p-6 bg-blue-50 rounded-[2rem] border border-blue-100">
-                    <p class="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-2">Market Leader</p>
-                    <p class="text-sm text-gray-700 leading-relaxed font-semibold">Ekspedisi <b class="text-blue-600 uppercase underline decoration-2">${topExp}</b> memimpin pengiriman dengan volume <b class="text-blue-600">${expGroups[topExp] || 0} paket</b>.</p>
-                </div>
-                <div class="p-6 bg-indigo-50 rounded-[2rem] border border-indigo-100">
-                    <p class="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-2">Volume Harian</p>
-                    <p class="text-sm text-gray-700 leading-relaxed font-semibold">Tercatat rata-rata pengiriman sebanyak <b class="text-indigo-600">${avgDaily} paket per hari</b> dalam rentang waktu terpilih.</p>
-                </div>
-                <div class="p-6 bg-purple-50 rounded-[2rem] border border-purple-100">
-                    <p class="text-[10px] font-black text-purple-400 uppercase tracking-widest mb-2">Efisiensi</p>
-                    <p class="text-sm text-gray-700 leading-relaxed font-semibold">Terdapat <b class="text-purple-600">${expLabels.length} ekspedisi aktif</b> yang melayani operasional Uberpaket pada periode ini.</p>
-                </div>
-            `;
-
-            // Setup Charts
-            if (state.charts.line) state.charts.line.destroy();
-            if (state.charts.pie) state.charts.pie.destroy();
-
-            const ctxLine = document.getElementById('growthChart').getContext('2d');
-            state.charts.line = new Chart(ctxLine, {
-                type: 'line',
-                data: {
-                    labels: dateLabels,
-                    datasets: [{
-                        label: 'Paket',
-                        data: dateValues,
-                        borderColor: '#2563eb',
-                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
-                        fill: true,
-                        tension: 0.4,
-                        borderWidth: 3,
-                        pointRadius: 4,
-                        pointBackgroundColor: '#fff'
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
-            });
-
-            const ctxPie = document.getElementById('distChart').getContext('2d');
-            state.charts.pie = new Chart(ctxPie, {
-                type: 'doughnut',
-                data: {
-                    labels: expLabels.map(l => l.toUpperCase()),
-                    datasets: [{
-                        data: expValues,
-                        backgroundColor: ['#2563eb', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#6366f1'],
-                        borderWidth: 0
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20, font: { weight: 'bold', size: 10 } } } }, cutout: '70%' }
-            });
-            
-            lucide.createIcons();
-        }
-
-        function renderSettings() {
-            const content = document.getElementById('app-content');
-            content.innerHTML = `
-                <div class="max-w-4xl mx-auto px-4 py-8 space-y-8 animate-in fade-in duration-500">
-                    <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Pengaturan Komisi</h1>
-                    <div class="grid lg:grid-cols-3 gap-8">
-                        <div class="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm h-fit">
-                            <h3 class="font-black text-gray-800 mb-6 tracking-tight text-center md:text-left">Tambah Ekspedisi</h3>
-                            <input id="set-name" placeholder="Nama Ekspedisi" class="w-full p-4 border rounded-2xl bg-gray-50 mb-4 font-bold outline-none focus:ring-2 focus:ring-blue-500">
-                            <input id="set-rate" type="number" placeholder="Komisi/Paket" class="w-full p-4 border rounded-2xl bg-gray-50 mb-6 font-bold outline-none focus:ring-2 focus:ring-blue-500">
-                            <button onclick="addExpedition()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-blue-100 hover:bg-blue-700 transition-all active:scale-95">Simpan</button>
-                        </div>
-                        <div class="lg:col-span-2 bg-white rounded-[2.5rem] border border-gray-100 overflow-hidden shadow-sm">
-                            <table class="w-full text-left">
-                                <thead class="bg-gray-50/50 text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] border-b">
-                                    <tr><th class="px-8 py-5">Ekspedisi</th><th class="px-8 py-5 text-right">Tarif</th><th class="px-8 py-5 text-right">Aksi</th></tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-50">
-                                    ${state.settings.map(c => `
-                                        <tr>
-                                            <td class="px-8 py-5 font-black uppercase text-gray-700 tracking-wide">${c.name}</td>
-                                            <td class="px-8 py-5 text-right text-green-600 font-black">Rp ${Number(c.rate).toLocaleString('id-ID')}</td>
-                                            <td class="px-8 py-5 text-right">
-                                                <button onclick="confirmDeleteSetting('${c.id}', '${c.name}')" class="p-2 text-red-300 hover:text-red-600 transition-colors">
-                                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    `).join('') || '<tr><td colspan="3" class="p-10 text-center text-gray-400 italic">Belum ada daftar ekspedisi</td></tr>'}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div class="bg-red-50 p-8 rounded-[2.5rem] border-2 border-red-100 shadow-sm mt-12">
-                        <div class="flex flex-col md:flex-row justify-between items-center gap-6">
-                            <div class="text-center md:text-left">
-                                <h3 class="text-red-800 font-black text-xl mb-1">Zona Bahaya</h3>
-                                <p class="text-red-600 text-sm font-medium">Hapus seluruh data bank data secara permanen</p>
-                            </div>
-                            <button onclick="toggleResetModal(true)" class="px-10 py-4 bg-red-600 text-white rounded-2xl font-black shadow-xl shadow-red-100 hover:bg-red-700 transition-all active:scale-95">Kosongkan Bank Data</button>
-                        </div>
-                    </div>
-                </div>
-            `;
-            lucide.createIcons();
-        }
-
-        // --- Fitur Modal & Handler (Sama seperti sebelumnya) ---
-        function toggleConfirmModal(show, title = "", text = "", onConfirm = null) {
-            const modal = document.getElementById('confirm-modal');
-            if (show) {
-                document.getElementById('confirm-title').innerText = title;
-                document.getElementById('confirm-text').innerText = text;
-                const btn = document.getElementById('confirm-execute-btn');
-                btn.onclick = async () => { if (onConfirm) await onConfirm(); toggleConfirmModal(false); };
-                modal.classList.remove('hidden');
-            } else modal.classList.add('hidden');
-            lucide.createIcons();
-        }
-        function showMessage(title, text, type = 'info') {
-            const modal = document.getElementById('msg-modal');
-            document.getElementById('msg-title').innerText = title;
-            document.getElementById('msg-text').innerText = text;
-            const area = document.getElementById('msg-icon-area');
-            area.className = "w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 " + (type === 'error' ? "bg-red-100 text-red-600" : "bg-blue-100 text-blue-600");
-            area.innerHTML = `<i data-lucide="${type === 'error' ? 'alert-circle' : 'info'}"></i>`;
-            modal.classList.remove('hidden');
-            lucide.createIcons();
-        }
-        function closeMsgModal() { document.getElementById('msg-modal').classList.add('hidden'); }
-        function confirmDeleteSetting(id, name) { toggleConfirmModal(true, "Hapus Ekspedisi?", `Hapus "${name.toUpperCase()}" dari daftar?`, async () => { toggleLoader(true, "Menghapus..."); const { error } = await supabaseClient.from('settings').delete().eq('id', id); toggleLoader(false); if (error) showMessage("Gagal", error.message, "error"); else await loadData(); }); }
-        function confirmDeleteEntry(id) { toggleConfirmModal(true, "Hapus Rekaman?", "Tindakan ini akan menghapus rekaman data ini secara permanen.", async () => { toggleLoader(true, "Menghapus..."); const { error } = await supabaseClient.from('shipments').delete().eq('id', id); toggleLoader(false); if (error) showMessage("Gagal", error.message, "error"); else await loadData(); }); }
-        function addInputRow() { state.inputRows.push({ expedition: '', count: '' }); renderDashboard(); }
-        function removeInputRow(index) { if (state.inputRows.length > 1) { state.inputRows.splice(index, 1); renderDashboard(); } }
-        function updateInputRow(index, field, value) { state.inputRows[index][field] = value; }
-        async function submitInputData() {
-            const date = document.getElementById('input-date').value;
-            const validData = state.inputRows.filter(r => r.expedition && r.count > 0);
-            if (validData.length === 0) return showMessage("Peringatan", "Harap isi setidaknya satu baris data yang valid.");
-            toggleLoader(true, "Menyimpan data...");
-            const toInsert = validData.map(row => {
-                const rate = state.settings.find(s => s.name === row.expedition)?.rate || 0;
-                return { nama_ekspedisi: row.expedition, poin: parseInt(row.count), komisi: Number(rate) * parseInt(row.count), tanggal: date, nama_pengirim: "-", no_resi: `INPUT-${Date.now()}` };
-            });
-            const { error } = await supabaseClient.from('shipments').insert(toInsert);
-            toggleLoader(false);
-            if (error) showMessage("Kesalahan", error.message, "error");
-            else { state.inputRows = [{ expedition: '', count: '' }]; await loadData(); showMessage("Berhasil", "Data telah disimpan."); }
-        }
-        function toggleResetModal(show) { const modal = document.getElementById('reset-modal'); modal.classList.toggle('hidden', !show); if (show) { document.getElementById('reset-confirm-input').value = ''; document.getElementById('reset-confirm-input').focus(); } lucide.createIcons(); }
-        async function executeFullReset() {
-            const input = document.getElementById('reset-confirm-input').value.trim().toLowerCase();
-            if (input !== 'reset') return showMessage("Gagal", "Ketik kata 'reset' untuk konfirmasi.");
-            toggleLoader(true, "Mereset data...");
-            const { error } = await supabaseClient.from('shipments').delete().filter('id', 'neq', '00000000-0000-0000-0000-000000000000');
-            toggleLoader(false);
-            if (error) showMessage("Kesalahan", error.message, "error");
-            else { toggleResetModal(false); await loadData(); showMessage("Berhasil", "Bank data dikosongkan."); }
-        }
-        async function handleLogin() {
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-            if(!email || !password) return showMessage("Peringatan", "Isi email dan password.");
-            toggleLoader(true, "Autentikasi...");
-            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-            toggleLoader(false);
-            if (error) showMessage("Login Gagal", error.message, "error"); else { state.user = data.user; showView('dashboard'); }
-        }
-        async function handleLogout() { await supabaseClient.auth.signOut(); state.user = null; state.showCommission = false; showView('login'); }
-        function togglePinModal(show) { document.getElementById('pin-modal').classList.toggle('hidden', !show); if(show) document.getElementById('pin-input').focus(); }
-        function verifyOwnerPin() { if (document.getElementById('pin-input').value === OWNER_PIN) { state.showCommission = true; togglePinModal(false); showView(state.view); } else { showMessage("Gagal", "PIN salah.", "error"); document.getElementById('pin-input').value = ''; } }
-        function toggleCommission(show) { state.showCommission = show; showView(state.view); }
-        function updateDateRange(key, val) { state.dateRange[key] = val; showView(state.view); }
-        async function addExpedition() {
-            const name = document.getElementById('set-name').value.toLowerCase().trim();
-            const rate = document.getElementById('set-rate').value;
-            if(!name || !rate) return showMessage("Peringatan", "Harap isi semua kolom!");
-            toggleLoader(true, "Menyimpan...");
-            const { error } = await supabaseClient.from('settings').insert([{ name, rate: Number(rate) }]);
-            toggleLoader(false);
-            if(error) showMessage("Kesalahan", error.message, "error");
-            else { await loadData(); showMessage("Berhasil", `Ekspedisi ${name.toUpperCase()} ditambahkan.`); }
-        }
-        function toggleLoader(show, text = "") { document.getElementById('loader-text').innerText = text; document.getElementById('global-loader').classList.toggle('hidden', !show); }
-    </script>
+  // ---------- init ----------
+  fillSettingsForm();
+  renderTable();
+</script>
 </body>
 </html>
