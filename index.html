@@ -181,7 +181,10 @@
   .nota-actions{max-width:760px;margin:0 auto 12px;display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
   .nota{max-width:760px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.4)}
   .nota-top{background:var(--emerald);color:#f3ecd8;text-align:center;padding:20px 24px;border-bottom:3px solid var(--gold);position:relative}
-  .nota-top .logo{position:absolute;left:20px;top:50%;transform:translateY(-50%);width:52px;height:52px;object-fit:contain}
+  .nota-top .logo{position:absolute;left:16px;top:50%;transform:translateY(-50%);width:56px;height:56px;object-fit:contain;background:#fff;border-radius:9px;padding:5px}
+  .topbar .kaaba.haslogo,#splash .mark.haslogo{background:#fff;border-color:var(--gold)}
+  .topbar .kaaba.haslogo img{padding:2px}
+  #splash .mark.haslogo img{padding:5px}
   .nota-top .bism{font-family:'Amiri',serif;font-size:15px;color:var(--gold-soft);margin-bottom:4px}
   .nota-top h3{font-size:19px;font-weight:800}
   .nota-top .co{font-size:12px;color:#bcd3c9;margin-top:2px}
@@ -567,6 +570,35 @@
     }catch(e){return file}
   }
 
+  // Logo: pangkas tepi transparan/putih lalu perkecil — supaya markanya tampil besar & jelas
+  async function processLogo(file){
+    try{
+      const bmp=await createImageBitmap(file);
+      const pre=Math.min(1,1024/Math.max(bmp.width,bmp.height));
+      const c=document.createElement('canvas');
+      c.width=Math.round(bmp.width*pre);c.height=Math.round(bmp.height*pre);
+      const ctx=c.getContext('2d');ctx.drawImage(bmp,0,0,c.width,c.height);
+      const img=ctx.getImageData(0,0,c.width,c.height).data;
+      let minX=c.width,minY=c.height,maxX=-1,maxY=-1;
+      for(let y=0;y<c.height;y++)for(let x=0;x<c.width;x++){
+        const i=(y*c.width+x)*4;
+        const solid=img[i+3]>12 && !(img[i]>245&&img[i+1]>245&&img[i+2]>245);
+        if(solid){if(x<minX)minX=x;if(x>maxX)maxX=x;if(y<minY)minY=y;if(y>maxY)maxY=y}
+      }
+      if(maxX<0)return file;
+      const pad=Math.round(Math.max(maxX-minX,maxY-minY)*0.06);
+      minX=Math.max(0,minX-pad);minY=Math.max(0,minY-pad);
+      maxX=Math.min(c.width-1,maxX+pad);maxY=Math.min(c.height-1,maxY+pad);
+      const w=maxX-minX+1,h=maxY-minY+1;
+      const scale=Math.min(1,512/Math.max(w,h));
+      const out=document.createElement('canvas');
+      out.width=Math.round(w*scale);out.height=Math.round(h*scale);
+      out.getContext('2d').drawImage(c,minX,minY,w,h,0,0,out.width,out.height);
+      const blob=await new Promise(r=>out.toBlob(r,'image/png'));
+      return blob||file;
+    }catch(e){return file}
+  }
+
   // ============== STORAGE HELPERS ==============
   async function uploadTo(path,fileOrBlob){
     const {error}=await sb.storage.from('umroh').upload(path,fileOrBlob,{upsert:true,contentType:fileOrBlob.type||'image/jpeg'});
@@ -640,6 +672,8 @@
     $('topLogo').innerHTML=logoUrl?`<img src="${logoUrl}" alt="logo">`:'☪';
     $('logoPrev').innerHTML=logoUrl?`<img src="${logoUrl}" alt="logo">`:'☪';
     $('splashMark').innerHTML=logoUrl?`<img src="${logoUrl}" alt="logo">`:'☪';
+    $('topLogo').classList.toggle('haslogo',!!logoUrl);
+    $('splashMark').classList.toggle('haslogo',!!logoUrl);
   }
 
   // ============== AUTH FLOW ==============
@@ -844,9 +878,8 @@
     const f=e.target.files[0];if(!f)return;e.target.value='';
     toast('Mengunggah logo…');
     try{
-      const blob=await compressImage(f,640,0.85);
-      const ext=(blob.type==='image/png')?'png':'jpg';
-      const path='branding/logo.'+ext;
+      const blob=await processLogo(f);
+      const path='branding/logo.png';
       await uploadTo(path,blob);
       const {error}=await sb.from('settings').update({logo_path:path}).eq('id',1);
       if(error)throw error;
