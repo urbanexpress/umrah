@@ -1,0 +1,18 @@
+{
+  "name": "GACA - Belajar Bahasa Inggris SD",
+  "short_name": "GACA",
+  "description": "Belajar Bahasa Inggris seru untuk anak Kelas 1-6 SD: misi belajar, latihan bicara, kamus, game, dan peringkat se-Indonesia.",
+  "id": "gaca-v5",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "lang": "id",
+  "background_color": "#F4F7FF",
+  "theme_color": "#6C63FF",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
