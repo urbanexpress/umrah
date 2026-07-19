@@ -243,6 +243,8 @@
     .nota-view{position:absolute;inset:0;background:#fff;padding:0;overflow:visible}
     .nota-actions{display:none!important}
     .nota{box-shadow:none;border-radius:0;max-width:100%;width:210mm;margin:0 auto}
+    .nota-prices,.pay-summary{grid-template-columns:repeat(3,1fr)!important}
+    .nota-cols,.sig-grid{grid-template-columns:1fr 1fr!important}
     .nota-top{padding:8mm 10mm 6mm}
     .nota-body{padding:7mm 12mm}
     .nota-id .r{font-size:11.5px}
@@ -335,6 +337,7 @@
           <div class="field" style="grid-column:span 2"><label>Nama Calon Jamaah</label><input type="text" id="bNama" placeholder="Abdan Muhammad"></div>
           <div class="field"><label>Jumlah (pax)</label><input type="number" id="bJumlah" value="5" min="1"></div>
           <div class="field"><label>Program</label><input type="text" id="bProgram" value="9 Hari"></div>
+          <div class="field"><label>Nama Program</label><input type="text" id="bNamaProgram" placeholder="cth: Umroh Barakah Ramadhan"></div>
           <div class="field"><label>Asal Bandara</label><input type="text" id="bBandara" value="Soekarno Hatta"></div>
           <div class="field"><label>No. HP</label><input type="tel" id="bHp" placeholder="0812-xxxx-xxxx"></div>
           <div class="field"><label>Tgl Berangkat</label><input type="date" id="bTglGo"></div>
@@ -345,11 +348,17 @@
       <div class="card">
         <h2><span class="no">٢</span>Akomodasi &amp; Penerbangan</h2>
         <div class="grid2">
-          <div class="field"><label>Hotel Makkah</label><input type="text" id="bhMakkah" placeholder="Snood Ajayd"></div>
-          <div class="field"><label>Hotel Madinah</label><input type="text" id="bhMadinah" placeholder="Odest"></div>
-          <div class="field"><label>Hotel Jakarta</label><input type="text" id="bhJakarta" placeholder="Citadines"></div>
-          <div class="field"><label>Pesawat</label><input type="text" id="bhPesawat" placeholder="Saudi Airlines"></div>
+          <div class="field"><label>Hotel Makkah</label><input type="text" id="bhMakkah" list="dlMakkah" placeholder="Snood Ajayd"></div>
+          <div class="field"><label>Durasi di Makkah</label><input type="text" id="bDurMakkah" placeholder="cth: 5 Hari 4 Malam"></div>
+          <div class="field"><label>Hotel Madinah</label><input type="text" id="bhMadinah" list="dlMadinah" placeholder="Odest"></div>
+          <div class="field"><label>Durasi di Madinah</label><input type="text" id="bDurMadinah" placeholder="cth: 4 Hari 3 Malam"></div>
+          <div class="field" style="grid-column:1/-1"><label>Hotel Jakarta</label><input type="text" id="bhJakarta" list="dlJakarta" placeholder="Citadines"></div>
+          <div class="field"><label>Pesawat</label><input type="text" id="bhPesawat" list="dlPesawat" placeholder="Saudi Airlines"></div>
+          <div class="field"><label>Kelas Penerbangan</label><select id="bKelas"><option>Economy Class</option><option>Business Class</option><option>First Class</option></select></div>
+          <datalist id="dlMakkah"></datalist><datalist id="dlMadinah"></datalist>
+          <datalist id="dlJakarta"></datalist><datalist id="dlPesawat"></datalist>
         </div>
+        <p class="hint">Durasi hanya keterangan penjelas di nota, tidak ikut kalkulasi biaya. Nama hotel &amp; pesawat yang pernah disimpan otomatis muncul sebagai saran saat mengetik.</p>
       </div>
 
       <div class="card">
@@ -622,6 +631,7 @@
       id:r.id,nama:r.nama,hp:r.hp||'',program:r.program||'',jumlah:r.jumlah,
       bandara:r.bandara||'',tglGo:r.tgl_go||'',tglBack:r.tgl_back||'',
       hMakkah:r.h_makkah||'',hMadinah:r.h_madinah||'',hJakarta:r.h_jakarta||'',hPesawat:r.h_pesawat||'',
+      namaProgram:r.nama_program||'',durMakkah:r.durasi_makkah||'',durMadinah:r.durasi_madinah||'',kelas:r.kelas_pesawat||'',
       components:r.components||[],
       prices:{quad:Number(r.price_quad),triple:Number(r.price_triple),double:Number(r.price_double)},
       inc:r.inc||[],exc:r.exc||[],payRoom:r.pay_room||'quad',ttdPath:r.ttd_path||null,
@@ -635,6 +645,7 @@
       nama:o.nama,hp:o.hp,program:o.program,jumlah:o.jumlah,bandara:o.bandara,
       tgl_go:o.tglGo||null,tgl_back:o.tglBack||null,
       h_makkah:o.hMakkah,h_madinah:o.hMadinah,h_jakarta:o.hJakarta,h_pesawat:o.hPesawat,
+      nama_program:o.namaProgram,durasi_makkah:o.durMakkah,durasi_madinah:o.durMadinah,kelas_pesawat:o.kelas,
       components:o.components,
       kurs_usd_used:Number(S.kursUsd)||0,kurs_sar_used:Number(S.kursSar)||0,
       fee_used:Number(S.fee)||0,margin_used:Number(S.margin)||0,
@@ -663,6 +674,15 @@
     const {data,error}=await sb.from('offers').select('*, payments(*)').order('created_at',{ascending:false});
     if(error)throw error;
     offers=(data||[]).map(dbToOffer);
+    renderDatalists();
+  }
+  function renderDatalists(){
+    const fill=(id,vals)=>{const d=$(id);if(!d)return;
+      d.innerHTML=[...new Set(vals.filter(Boolean))].map(v=>`<option value="${esc(v)}">`).join('')};
+    fill('dlMakkah',offers.map(o=>o.hMakkah));
+    fill('dlMadinah',offers.map(o=>o.hMadinah));
+    fill('dlJakarta',offers.map(o=>o.hJakarta));
+    fill('dlPesawat',offers.map(o=>o.hPesawat));
   }
   async function refreshLogo(){
     logoUrl=null;
@@ -792,12 +812,14 @@
     $('bId').value='';$('bNama').value='';$('bHp').value='';$('bProgram').value='9 Hari';
     $('bJumlah').value=5;$('bBandara').value='Soekarno Hatta';$('bTglGo').value='';$('bTglBack').value='';
     $('bhMakkah').value='';$('bhMadinah').value='';$('bhJakarta').value='';$('bhPesawat').value='Saudi Airlines';
+    $('bNamaProgram').value='';$('bDurMakkah').value='';$('bDurMadinah').value='';$('bKelas').value='Economy Class';
     loadCalcRows(JSON.parse(JSON.stringify(S.components)));recalcBuat();goTab('buat');
   }
   function editOffer(o){
     $('bId').value=o.id;$('bNama').value=o.nama;$('bHp').value=o.hp;$('bProgram').value=o.program;
     $('bJumlah').value=o.jumlah;$('bBandara').value=o.bandara;$('bTglGo').value=o.tglGo;$('bTglBack').value=o.tglBack;
     $('bhMakkah').value=o.hMakkah;$('bhMadinah').value=o.hMadinah;$('bhJakarta').value=o.hJakarta;$('bhPesawat').value=o.hPesawat;
+    $('bNamaProgram').value=o.namaProgram;$('bDurMakkah').value=o.durMakkah;$('bDurMadinah').value=o.durMadinah;$('bKelas').value=o.kelas||'Economy Class';
     loadCalcRows(o.components&&o.components.length?o.components:JSON.parse(JSON.stringify(S.components)));
     recalcBuat();goTab('buat');
   }
@@ -813,6 +835,8 @@
       tglGo:$('bTglGo').value,tglBack:$('bTglBack').value,
       hMakkah:$('bhMakkah').value.trim(),hMadinah:$('bhMadinah').value.trim(),
       hJakarta:$('bhJakarta').value.trim(),hPesawat:$('bhPesawat').value.trim(),
+      namaProgram:$('bNamaProgram').value.trim(),durMakkah:$('bDurMakkah').value.trim(),
+      durMadinah:$('bDurMadinah').value.trim(),kelas:$('bKelas').value,
       components:readComp('compBody')
     };
     const row=offerToDb(o,r);
@@ -1056,9 +1080,9 @@
       <div class="nota-top">${logoImg()}<div class="bism">${BISM}</div><h3>Penawaran Biaya Umroh</h3><div class="co">Harga per jamaah (per pax)</div></div>
       <div class="nota-body">
         <div class="nota-id">
-          ${idRow('Nama Calon Jamaah',o.nama)}${idRow('Program',o.program)}${idRow('Jumlah',o.jumlah+' Pax')}
+          ${idRow('Nama Calon Jamaah',o.nama)}${idRow('Program',o.program)}${o.namaProgram?idRow('Nama Program',o.namaProgram):''}${idRow('Jumlah',o.jumlah+' Pax')}
           ${idRow('Asal Bandara',o.bandara)}${idRow('Rencana Berangkat',fmtRange(o.tglGo,o.tglBack))}
-          ${idRow('Hotel Makkah',o.hMakkah)}${idRow('Hotel Madinah',o.hMadinah)}${idRow('Hotel Jakarta',o.hJakarta)}${idRow('Pesawat',o.hPesawat)}
+          ${idRow('Hotel Makkah',[o.hMakkah,o.durMakkah].filter(Boolean).join(' — '))}${idRow('Hotel Madinah',[o.hMadinah,o.durMadinah].filter(Boolean).join(' — '))}${idRow('Hotel Jakarta',o.hJakarta)}${idRow('Pesawat',[o.hPesawat,o.kelas].filter(Boolean).join(' · '))}
         </div>
         <div class="nota-sec-title">Harga Penawaran</div>
         <div class="nota-prices">
@@ -1086,7 +1110,7 @@
       <div class="nota-top">${logoImg()}<div class="bism">${BISM}</div><h3>Nota Pembayaran Umroh</h3><div class="co">${lunas?'LUNAS':'Bukti Pembayaran'}</div></div>
       <div class="nota-body">
         <div class="nota-id">
-          ${idRow('Nama Calon Jamaah',o.nama)}${idRow('Program',o.program)}${idRow('Jumlah',o.jumlah+' Pax')}
+          ${idRow('Nama Calon Jamaah',o.nama)}${idRow('Program',o.program)}${o.namaProgram?idRow('Nama Program',o.namaProgram):''}${idRow('Jumlah',o.jumlah+' Pax')}
           ${idRow('Tipe Kamar',room.charAt(0).toUpperCase()+room.slice(1))}${idRow('Rencana Berangkat',fmtRange(o.tglGo,o.tglBack))}
         </div>
         <div class="nota-sec-title">Rincian Pembayaran</div>
@@ -1112,7 +1136,8 @@
     const node=$('notaContent');
     $('btnPdf').disabled=true;$('btnPdf').textContent='Membuat PDF…';
     try{
-      const canvas=await html2canvas(node,{scale:2,backgroundColor:'#ffffff',useCORS:true});
+      const canvas=await html2canvas(node,{scale:2,backgroundColor:'#ffffff',useCORS:true,windowWidth:1024,
+        onclone:doc=>{const n=doc.getElementById('notaContent');if(n){n.style.width='794px';n.style.maxWidth='794px';n.style.margin='0'}}});
       const img=canvas.toDataURL('image/jpeg',0.92);
       const pdf=new jspdf.jsPDF({unit:'mm',format:'a4',orientation:'portrait'});
       const pageW=210,pageH=297;
