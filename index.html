@@ -318,7 +318,7 @@
         <table>
           <thead><tr>
             <th>Nama Jamaah</th><th>Program</th><th>Pax</th><th>Berangkat</th>
-            <th>Harga (Quad)</th><th>Status</th><th style="text-align:right">Aksi</th>
+            <th>Total Tagihan</th><th>Status</th><th style="text-align:right">Aksi</th>
           </tr></thead>
           <tbody id="tbody"></tbody>
         </table>
@@ -387,7 +387,21 @@
           <div class="rp-box"><div class="t">Triple</div><div class="p" id="pTriple">Rp 0</div><div class="s" id="sTriple">+ Rp 0</div></div>
           <div class="rp-box"><div class="t">Double</div><div class="p" id="pDouble">Rp 0</div><div class="s" id="sDouble">+ Rp 0</div></div>
         </div>
-        <p class="hint">Quad = Harga Pokok/pax + Fee Referal + Margin. Triple &amp; Double = Quad + selisih tipe kamar. Kurs, fee &amp; margin diambil dari Pengaturan Harga saat penawaran disimpan (di-snapshot, tidak berubah mengikuti pengaturan baru).</p>
+
+        <div style="margin-top:16px;border:1px solid var(--line);border-radius:10px;padding:15px 16px;background:var(--paper)">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--emerald);margin-bottom:11px">Komposisi Kamar — tiap orang boleh beda tipe</div>
+          <div class="grid3">
+            <div class="field"><label>Jumlah Quad (pax)</label><input type="number" id="kQuad" value="0" min="0"></div>
+            <div class="field"><label>Jumlah Triple (pax)</label><input type="number" id="kTriple" value="0" min="0"></div>
+            <div class="field"><label>Jumlah Double (pax)</label><input type="number" id="kDouble" value="0" min="0"></div>
+          </div>
+          <div id="kompWarn" style="font-size:12px;font-weight:600;margin-top:9px"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:11px;padding-top:11px;border-top:2px solid var(--line)">
+            <span style="font-weight:700">Grand Total Tagihan</span>
+            <b id="kGrand" style="font-size:19px;color:var(--emerald)">Rp 0</b>
+          </div>
+        </div>
+        <p class="hint">Quad = Harga Pokok/pax + Fee Referal + Margin. Triple &amp; Double = Quad + selisih tipe kamar. Grand Total = jumlah harga tiap orang sesuai tipe kamarnya. Total pax pada komposisi harus sama dengan Jumlah (pax) di atas.</p>
       </div>
 
       <div class="save-bar">
@@ -474,13 +488,7 @@
     <div class="modal">
       <div class="modal-head"><h3>Kelola Pembayaran</h3><button class="x" id="payX">&times;</button></div>
       <div class="modal-body">
-        <div class="field" style="margin-bottom:12px"><label>Pilih Tipe Kamar</label>
-          <select id="payRoom"><option value="quad">Quad</option><option value="triple">Triple</option><option value="double">Double</option></select>
-        </div>
-        <div style="background:var(--paper);border:1px solid var(--line);border-radius:9px;padding:11px 13px;font-size:13px;margin-bottom:12px">
-          <div style="display:flex;justify-content:space-between"><span>Harga / pax</span><b id="payPerPax">Rp 0</b></div>
-          <div style="display:flex;justify-content:space-between;margin-top:3px"><span id="payPaxLbl">Total tagihan</span><b id="payTotal" style="color:var(--emerald)">Rp 0</b></div>
-        </div>
+        <div id="payKompSummary" style="background:var(--paper);border:1px solid var(--line);border-radius:9px;padding:11px 13px;font-size:13px;margin-bottom:12px"></div>
         <div class="grid3" style="grid-template-columns:1fr 1fr 1fr">
           <div class="field"><label>Tanggal</label><input type="date" id="payDate"></div>
           <div class="field"><label>Jenis</label><select id="payType"><option>DP</option><option>Pelunasan</option><option>Cicilan</option></select></div>
@@ -632,6 +640,7 @@
       bandara:r.bandara||'',tglGo:r.tgl_go||'',tglBack:r.tgl_back||'',
       hMakkah:r.h_makkah||'',hMadinah:r.h_madinah||'',hJakarta:r.h_jakarta||'',hPesawat:r.h_pesawat||'',
       namaProgram:r.nama_program||'',durMakkah:r.durasi_makkah||'',durMadinah:r.durasi_madinah||'',kelas:r.kelas_pesawat||'',
+      komposisi:{quad:Number(r.qty_quad)||0,triple:Number(r.qty_triple)||0,double:Number(r.qty_double)||0},
       components:r.components||[],
       prices:{quad:Number(r.price_quad),triple:Number(r.price_triple),double:Number(r.price_double)},
       inc:r.inc||[],exc:r.exc||[],payRoom:r.pay_room||'quad',ttdPath:r.ttd_path||null,
@@ -646,6 +655,7 @@
       tgl_go:o.tglGo||null,tgl_back:o.tglBack||null,
       h_makkah:o.hMakkah,h_madinah:o.hMadinah,h_jakarta:o.hJakarta,h_pesawat:o.hPesawat,
       nama_program:o.namaProgram,durasi_makkah:o.durMakkah,durasi_madinah:o.durMadinah,kelas_pesawat:o.kelas,
+      qty_quad:o.komposisi.quad,qty_triple:o.komposisi.triple,qty_double:o.komposisi.double,
       components:o.components,
       kurs_usd_used:Number(S.kursUsd)||0,kurs_sar_used:Number(S.kursSar)||0,
       fee_used:Number(S.fee)||0,margin_used:Number(S.margin)||0,
@@ -803,8 +813,21 @@
     $('rFee').textContent=rupiah(fee);$('rMargin').textContent=rupiah(margin);
     $('pQuad').textContent=rupiah(quad);$('pTriple').textContent=rupiah(triple);$('pDouble').textContent=rupiah(double);
     $('sTriple').textContent='+ '+rupiah(S.tripleAdd);$('sDouble').textContent='+ '+rupiah(S.doubleAdd);
+    lastPrices={quad,triple,double};recalcComposition();
     return {total,pokok,quad,triple,double};
   }
+  let lastPrices={quad:0,triple:0,double:0};
+  function recalcComposition(){
+    const jml=Number($('bJumlah').value)||0;
+    let qq=Number($('kQuad').value)||0,qt=Number($('kTriple').value)||0,qd=Number($('kDouble').value)||0;
+    if(qq+qt+qd===0 && jml>0){qq=jml;$('kQuad').value=jml}
+    const sum=qq+qt+qd;
+    const grand=qq*lastPrices.quad+qt*lastPrices.triple+qd*lastPrices.double;
+    $('kGrand').textContent=rupiah(grand);
+    $('kompWarn').innerHTML=(sum===jml)?'':`<span style="color:var(--danger)">Komposisi ${sum} pax belum sama dengan Jumlah ${jml} pax.</span>`;
+    return {qq,qt,qd,sum,grand};
+  }
+  ['kQuad','kTriple','kDouble'].forEach(id=>$(id).addEventListener('input',recalcComposition));
   $('bJumlah').addEventListener('input',recalcBuat);
   $('addComp').addEventListener('click',()=>{$('compBody').appendChild(compRow({name:'',cur:'IDR',price:0,dur:1,qty:1,active:true},recalcBuat));recalcBuat()});
 
@@ -813,6 +836,7 @@
     $('bJumlah').value=5;$('bBandara').value='Soekarno Hatta';$('bTglGo').value='';$('bTglBack').value='';
     $('bhMakkah').value='';$('bhMadinah').value='';$('bhJakarta').value='';$('bhPesawat').value='Saudi Airlines';
     $('bNamaProgram').value='';$('bDurMakkah').value='';$('bDurMadinah').value='';$('bKelas').value='Economy Class';
+    $('kQuad').value=0;$('kTriple').value=0;$('kDouble').value=0;
     loadCalcRows(JSON.parse(JSON.stringify(S.components)));recalcBuat();goTab('buat');
   }
   function editOffer(o){
@@ -820,6 +844,7 @@
     $('bJumlah').value=o.jumlah;$('bBandara').value=o.bandara;$('bTglGo').value=o.tglGo;$('bTglBack').value=o.tglBack;
     $('bhMakkah').value=o.hMakkah;$('bhMadinah').value=o.hMadinah;$('bhJakarta').value=o.hJakarta;$('bhPesawat').value=o.hPesawat;
     $('bNamaProgram').value=o.namaProgram;$('bDurMakkah').value=o.durMakkah;$('bDurMadinah').value=o.durMadinah;$('bKelas').value=o.kelas||'Economy Class';
+    const k=o.komposisi||{quad:0,triple:0,double:0};$('kQuad').value=k.quad;$('kTriple').value=k.triple;$('kDouble').value=k.double;
     loadCalcRows(o.components&&o.components.length?o.components:JSON.parse(JSON.stringify(S.components)));
     recalcBuat();goTab('buat');
   }
@@ -829,6 +854,9 @@
     const nama=$('bNama').value.trim();
     if(!nama){toast('Nama jamaah wajib diisi');$('bNama').focus();return}
     const r=recalcBuat();
+    const comp=recalcComposition();
+    const jml=Number($('bJumlah').value)||1;
+    if(comp.sum!==jml){toast(`Komposisi kamar (${comp.sum} pax) harus sama dengan Jumlah (${jml} pax)`);return}
     const o={
       nama,hp:$('bHp').value.trim(),program:$('bProgram').value.trim(),
       jumlah:Number($('bJumlah').value)||1,bandara:$('bBandara').value.trim(),
@@ -837,6 +865,7 @@
       hJakarta:$('bhJakarta').value.trim(),hPesawat:$('bhPesawat').value.trim(),
       namaProgram:$('bNamaProgram').value.trim(),durMakkah:$('bDurMakkah').value.trim(),
       durMadinah:$('bDurMadinah').value.trim(),kelas:$('bKelas').value,
+      komposisi:{quad:comp.qq,triple:comp.qt,double:comp.qd},
       components:readComp('compBody')
     };
     const row=offerToDb(o,r);
@@ -913,7 +942,14 @@
 
   // ============== REKAP ==============
   const paidOf=o=>(o.payments||[]).reduce((s,p)=>s+(Number(p.nominal)||0),0);
-  const totalOf=o=>(o.prices?o.prices[o.payRoom||'quad']:0)*(o.jumlah||1);
+  function kompOf(o){
+    const k=o.komposisi||{quad:0,triple:0,double:0};
+    if((k.quad+k.triple+k.double)>0)return k;
+    const r=o.payRoom||'quad';const f={quad:0,triple:0,double:0};f[r]=o.jumlah||0;return f; // fallback penawaran lama
+  }
+  const totalOf=o=>{const k=kompOf(o);return k.quad*o.prices.quad+k.triple*o.prices.triple+k.double*o.prices.double};
+  function kompRows(o){const k=kompOf(o);return[['Quad',k.quad,o.prices.quad],['Triple',k.triple,o.prices.triple],['Double',k.double,o.prices.double]].filter(r=>r[1]>0)}
+  const kompStr=o=>kompRows(o).map(r=>`${r[1]} ${r[0]}`).join(', ')||'—';
   function statusOf(o){const paid=paidOf(o),tot=totalOf(o);if(tot>0&&paid>=tot)return'lunas';if(paid>0)return'dp';return'belum'}
   function renderTable(){
     const q=$('q').value.trim().toLowerCase();
@@ -924,7 +960,7 @@
       const delBtn=isOwner()?`<button class="btn btn-danger-ghost btn-sm" data-del="${o.id}">Hapus</button>`:'';
       const tr=document.createElement('tr');
       tr.innerHTML=`<td class="nama">${esc(o.nama)}</td><td>${esc(o.program)||'—'}</td><td>${o.jumlah} pax</td>`
-        +`<td>${fmtDate(o.tglGo)}</td><td class="harga">${rupiah(o.prices.quad)}</td>`
+        +`<td>${fmtDate(o.tglGo)}</td><td class="harga">${rupiah(totalOf(o))}</td>`
         +`<td><span class="badge ${st}">${stTxt}</span></td>`
         +`<td class="act"><button class="btn btn-ghost btn-sm" data-nota="${o.id}">Nota</button>`
         +`<button class="btn btn-blue btn-sm" data-pay="${o.id}">Bayar</button>`
@@ -955,14 +991,14 @@
   let curPay=null, pendingProof=null;
   function openPay(o){
     curPay=o;pendingProof=null;$('payProofName').textContent='';
-    $('payRoom').value=o.payRoom||'quad';
     $('payDate').value=new Date().toISOString().slice(0,10);
     $('ttdView').style.display=o.ttdPath?'inline-block':'none';
     renderPay();$('payOverlay').classList.add('open');
   }
   function renderPay(){
-    const o=curPay;const room=$('payRoom').value;const perPax=o.prices[room];const tot=perPax*(o.jumlah||1);
-    $('payPerPax').textContent=rupiah(perPax);$('payPaxLbl').textContent=`Total tagihan (${o.jumlah} pax)`;$('payTotal').textContent=rupiah(tot);
+    const o=curPay;const tot=totalOf(o);
+    const lines=kompRows(o).map(r=>`<div style="display:flex;justify-content:space-between"><span>${r[1]} × ${r[0]} @ ${rupiah(r[2])}</span><b>${rupiah(r[1]*r[2])}</b></div>`).join('');
+    $('payKompSummary').innerHTML=lines+`<div style="display:flex;justify-content:space-between;margin-top:6px;padding-top:6px;border-top:1px solid var(--line)"><b>Total Tagihan</b><b style="color:var(--emerald)">${rupiah(tot)}</b></div>`;
     const paid=paidOf(o);const list=$('payList');list.innerHTML='';
     (o.payments||[]).forEach(p=>{
       const row=document.createElement('div');row.className='prow2';
@@ -977,12 +1013,6 @@
     $('paySisa').textContent=rupiah(Math.max(0,tot-paid));
     $('paySisa').style.color=(tot>0&&paid>=tot)?'var(--ok)':'var(--danger)';
   }
-  $('payRoom').addEventListener('change',async()=>{
-    curPay.payRoom=$('payRoom').value;
-    const {error}=await sb.from('offers').update({pay_room:curPay.payRoom}).eq('id',curPay.id);
-    if(error)toast('Gagal simpan tipe kamar: '+error.message);
-    renderPay();renderTable();
-  });
   $('payPickProof').addEventListener('click',()=>$('payProofFile').click());
   $('payProofFile').addEventListener('change',e=>{
     pendingProof=e.target.files[0]||null;
@@ -1070,6 +1100,21 @@
   const BISM='بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ';
   const idRow=(k,v)=>`<div class="r"><span class="k">${k}</span><span class="v">${esc(v)||'—'}</span></div>`;
   const logoImg=()=>logoUrl?`<img class="logo" src="${logoUrl}" alt="logo">`:'';
+  function notaHargaBlock(o){
+    const rows=kompRows(o);
+    if(!rows.length){ // penawaran lama tanpa komposisi → tampilkan 3 harga per pax
+      return `<div class="nota-prices">
+        <div class="np"><div class="h">Quad</div><div class="b">${rupiah(o.prices.quad)}<span class="pp">/ pax</span></div></div>
+        <div class="np"><div class="h">Triple</div><div class="b">${rupiah(o.prices.triple)}<span class="pp">/ pax</span></div></div>
+        <div class="np"><div class="h">Double</div><div class="b">${rupiah(o.prices.double)}<span class="pp">/ pax</span></div></div></div>`;
+    }
+    const body=rows.map(r=>`<tr><td>${r[0]}</td><td class="r">${r[1]} pax</td><td class="r">${rupiah(r[2])}</td><td class="r">${rupiah(r[1]*r[2])}</td></tr>`).join('');
+    return `<table class="pay-table">
+      <thead><tr><th>Tipe Kamar</th><th class="r">Jumlah</th><th class="r">Harga / pax</th><th class="r">Subtotal</th></tr></thead>
+      <tbody>${body}
+        <tr><td colspan="3" class="r" style="font-weight:800;background:var(--paper)">GRAND TOTAL</td><td class="r" style="font-weight:800;color:var(--emerald);background:var(--paper)">${rupiah(totalOf(o))}</td></tr>
+      </tbody></table>`;
+  }
   let notaFileName='nota';
 
   function showNotaPenawaran(o){
@@ -1084,12 +1129,8 @@
           ${idRow('Asal Bandara',o.bandara)}${idRow('Rencana Berangkat',fmtRange(o.tglGo,o.tglBack))}
           ${idRow('Hotel Makkah',[o.hMakkah,o.durMakkah].filter(Boolean).join(' — '))}${idRow('Hotel Madinah',[o.hMadinah,o.durMadinah].filter(Boolean).join(' — '))}${idRow('Hotel Jakarta',o.hJakarta)}${idRow('Pesawat',[o.hPesawat,o.kelas].filter(Boolean).join(' · '))}
         </div>
-        <div class="nota-sec-title">Harga Penawaran</div>
-        <div class="nota-prices">
-          <div class="np"><div class="h">Quad</div><div class="b">${rupiah(o.prices.quad)}<span class="pp">/ pax</span></div></div>
-          <div class="np"><div class="h">Triple</div><div class="b">${rupiah(o.prices.triple)}<span class="pp">/ pax</span></div></div>
-          <div class="np"><div class="h">Double</div><div class="b">${rupiah(o.prices.double)}<span class="pp">/ pax</span></div></div>
-        </div>
+        <div class="nota-sec-title">Rincian Harga per Tipe Kamar</div>
+        ${notaHargaBlock(o)}
         <div class="nota-cols">
           <div><h4>Harga Termasuk</h4><ul class="inc">${inc}</ul></div>
           <div><h4>Harga Belum Termasuk</h4><ul class="exc">${exc}</ul></div>
@@ -1101,7 +1142,7 @@
 
   function showNotaPembayaran(o){
     notaFileName='nota-pembayaran-'+o.nama.toLowerCase().replace(/[^a-z0-9]+/g,'-');
-    const room=o.payRoom||'quad';const perPax=o.prices[room];const tot=perPax*(o.jumlah||1);
+    const tot=totalOf(o);
     const paid=paidOf(o);const sisa=Math.max(0,tot-paid);const lunas=tot>0&&paid>=tot;
     const rows=(o.payments||[]).map(p=>`<tr><td>${fmtDate(p.tgl)}</td><td>${esc(p.jenis)}</td><td class="r">${rupiah(p.nominal)}</td></tr>`).join('')||'<tr><td colspan="3" style="opacity:.5">Belum ada pembayaran</td></tr>';
     const snk=(S.syarat||'').split('\n').map(l=>l.replace(/^\s*\d+[.)]\s*/,'').trim()).filter(Boolean)
@@ -1111,7 +1152,7 @@
       <div class="nota-body">
         <div class="nota-id">
           ${idRow('Nama Calon Jamaah',o.nama)}${idRow('Program',o.program)}${o.namaProgram?idRow('Nama Program',o.namaProgram):''}${idRow('Jumlah',o.jumlah+' Pax')}
-          ${idRow('Tipe Kamar',room.charAt(0).toUpperCase()+room.slice(1))}${idRow('Rencana Berangkat',fmtRange(o.tglGo,o.tglBack))}
+          ${idRow('Komposisi Kamar',kompStr(o))}${idRow('Rencana Berangkat',fmtRange(o.tglGo,o.tglBack))}
         </div>
         <div class="nota-sec-title">Rincian Pembayaran</div>
         <table class="pay-table"><thead><tr><th>Tanggal</th><th>Jenis</th><th class="r">Nominal</th></tr></thead><tbody>${rows}</tbody></table>
@@ -1126,7 +1167,7 @@
           <div class="sig"><div class="who">Petugas</div><div class="space"></div><div class="line"></div><div class="nm">(&nbsp;&nbsp;…………………………&nbsp;&nbsp;)</div></div>
         </div>
       </div>
-      <div class="nota-foot">${rupiah(perPax)} / pax × ${o.jumlah} pax · Mohon nota ini dicetak, ditandatangani, lalu difoto dan dikirim kembali sebagai arsip.</div>`;
+      <div class="nota-foot">${kompStr(o)} · Mohon nota ini dicetak, ditandatangani, lalu difoto dan dikirim kembali sebagai arsip.</div>`;
     $('notaView').classList.add('open');
   }
   $('notaClose').addEventListener('click',()=>$('notaView').classList.remove('open'));
